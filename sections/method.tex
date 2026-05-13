@@ -1,7 +1,34 @@
 \chapter{Method}
 
-\section{On-Policy Distillation}
+\section{Distillation}
 
-\section{Forward and Reverse KL}
+Distillation transfers knowledge between the teacher and the student by providing feedback of the student rollouts. However, we can define the distillation problem with different types of losses.
+
+For a prompt $x$ we define a student rollout as $$
+
+The earliest type of feedback is Supervised Fine-Tuning (SFT), where we use the teacher rollouts as a ground truth for the student to learn from. The loss function for SFT is the cross-entropy loss 
+
+
+
+\begin{equation}
+\mathcal{L}_{\mathrm{SFT}}(\theta)
+= - \sum_{t=1}^{T} \log p_\theta(y_t \mid x, y_{<t})
+\label{eq: xentropy}
+\end{equation}
+
+\begin{equation}
+
+\label{eq: general_kl}
+\end{equation}
+
+\section{Types of Distillation}
+
+Distillation as a task is generally defined as extracting knowledge from a teacher to a student model, but the actual process can take multiple forms depending on the source of the data we learn from and when we produce the teacher feedback for the student.
+
+Starting from when we produce the feedback from the teacher, a distillation method can be online or offline. In offline methods, you 
+
+\section{Top-K KL}
+
+The equation in 
 
 \section{Privileged Context}
