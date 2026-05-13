@@ -188,7 +188,7 @@ TS-RKL is not the standard top-$k$ reverse KL in Equation~\ref{eq:topk_reverse_k
 
 \section{Privileged Context}
 
-Privileged context is additional information that is available to the teacherduring training but will not be available to the student at inference time. Following the privileged information distillation setting of \cite{penalozaPrivilegedInformationDistillation2026}, the key asymmetry is that the teacher is conditioned on this extra information, while the student is not. In the notation of Section~\ref{sec:distillation_formalism}, let $c$ denote the privileged context associated with a prompt $x$. This context can take different forms, such as a reference solution, a successful action trace, tool calls, or a hint extracted from a stronger model. The student policy remains
+Privileged context is additional information that is available to the teacher during training but will not be available to the student at inference time. Following the privileged information distillation setting  \cite{shenfeldSelfDistillationEnablesContinual2026, hubotterReinforcementLearningSelfDistillation2026, penalozaPrivilegedInformationDistillation2026, zhaoSelfDistilledReasonerOnPolicy2026}, the key asymmetry is that the teacher is conditioned on this extra information, while the student is not. Following the notation of Section~\ref{sec:distillation_formalism}, let $c$ denote the privileged context associated with a prompt $x$. This context can take different forms, such as a reference solution, a successful action trace, tool calls, or a hint extracted from a stronger model. The student policy remains
 
 \begin{equation}
 \pi_\theta(\cdot \mid x, y_{<n}),
