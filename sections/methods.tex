@@ -108,83 +108,89 @@ The formulation in Equation~\ref{eq:sampled_token_forward_kl} is equivalent to t
 
 \section{Top-K KL}
 
-The KL objectives in Equations~\ref{eq:forward_kl} and~\ref{eq:reverse_kl} require summing over the full vocabulary at every token position. This is expensive for large language models, because the vocabulary can contain hundreds of thousands of tokens. A practical approximation is to keep only the $k$ most likely tokens under one of the two policies and compute the divergence on this truncated support.
+The KL objectives in Equations~\ref{eq:forward_kl} and~\ref{eq:reverse_kl} require summing over the full vocabulary at every token position. This is expensive for large language models, because the vocabulary can contain hundreds of thousands of tokens. A practical approximation is to keep the $k$ tokens with the largest log-probabilities under one of the two policies. However, we do not renormalize the retained log-probabilities over only those $k$ tokens. Renormalization would discard how much probability mass the model assigns to the rest of the vocabulary. Instead, we group all tokens outside the selected top-$k$ set into a single tail bucket.
 
-For each prefix $(x, y_{<n})$, define the teacher and student top-$k$ sets as
+For compactness, write $h_n = (x, y_{<n})$. For each prefix, define the teacher and student top-$k$ sets as
+
 
 \begin{equation}
 S_{T,n}^{k}
-= \mathrm{TopK}_{k}\left(\pi_T(\cdot \mid x, y_{<n})\right),
+= \mathrm{TopK}_{k}\left(\pi_T(\cdot \mid h_n)\right),
 \qquad
 S_{\theta,n}^{k}
-= \mathrm{TopK}_{k}\left(\pi_\theta(\cdot \mid x, y_{<n})\right).
+= \mathrm{TopK}_{k}\left(\pi_\theta(\cdot \mid h_n)\right).
 \label{eq:topk_sets}
 \end{equation}
 
-Given a distribution $q$ and a token set $S$, we write the distribution renormalized on that set as
+Given a distribution $q$ and a selected token set $S$, let $\tau_S$ denote the tail bucket containing all tokens in $V \setminus S$. This induces a coarsened distribution $q^{[S]}$ over $S \cup \{\tau_S\}$:
 
 \begin{equation}
-q_S(v \mid x, y_{<n})
+q^{[S]}(b \mid h_n)
 =
-\frac{q(v \mid x, y_{<n})}
-{\sum_{u \in S} q(u \mid x, y_{<n})},
-\qquad v \in S.
-\label{eq:topk_renormalization}
+\left\{
+\begin{array}{ll}
+q(b \mid h_n), & b \in S, \\
+1 - \sum_{u \in S} q(u \mid h_n), & b = \tau_S.
+\end{array}
+\right.
+\label{eq:tail_bucket_distribution}
 \end{equation}
 
-The standard top-$k$ forward KL uses the teacher top-$k$ set, because the expectation in the forward KL is taken under the teacher distribution:
+This construction preserves a coarse notion of the tail probability that is ignored by the top-$k$ token list. For example, with $k=5$, the first five buckets are the five selected tokens and the sixth bucket is the total probability mass assigned to every other token. This has three benefits over renormalizing the selected tokens. First, it keeps the top-$k$ probabilities on their original scale, so a model that assigns $90\%$ probability mass to the selected tokens is not treated the same as a model that assigns only $40\%$ mass to them. Second, it allows the loss to penalize disagreements about how much probability should remain in the long tail, even though the individual tail tokens are not represented. Third, it avoids artificially inflating the selected tokens when the model is uncertain and spreads probability mass across many low-probability alternatives.
+
+The standard top-$k$ forward KL uses the teacher top-$k$ set, because the expectation in the forward KL is taken under the teacher distribution. Both the teacher and student are evaluated on the same teacher-induced buckets $S_{T,n}^{k} \cup \{\tau_{S_{T,n}^{k}}\}$:
 
 \begin{equation}
 \widehat{D}_{\mathrm{KL}}^{k}
 (\pi_T \| \pi_\theta)(y \mid x)
 =
 \sum_{n=1}^{L_y}
-\sum_{v \in S_{T,n}^{k}}
-(\pi_T)_{S_{T,n}^{k}}(v \mid x, y_{<n})
+\sum_{b \in S_{T,n}^{k} \cup \{\tau_{S_{T,n}^{k}}\}}
+\pi_T^{[S_{T,n}^{k}]}(b \mid h_n)
 \log
-\frac{(\pi_T)_{S_{T,n}^{k}}(v \mid x, y_{<n})}
-{(\pi_\theta)_{S_{T,n}^{k}}(v \mid x, y_{<n})}.
+\frac{\pi_T^{[S_{T,n}^{k}]}(b \mid h_n)}
+{\pi_\theta^{[S_{T,n}^{k}]}(b \mid h_n)}.
 \label{eq:topk_forward_kl}
 \end{equation}
 
-Analogously, the standard top-$k$ reverse KL uses the student top-$k$ set, because the expectation in the reverse KL is taken under the student distribution:
+Analogously, the standard top-$k$ reverse KL uses the student top-$k$ set, because the expectation in the reverse KL is taken under the student distribution. The teacher is evaluated on the same student-induced buckets $S_{\theta,n}^{k} \cup \{\tau_{S_{\theta,n}^{k}}\}$:
 
 \begin{equation}
 \widehat{D}_{\mathrm{KL}}^{k}
 (\pi_\theta \| \pi_T)(y \mid x)
 =
 \sum_{n=1}^{L_y}
-\sum_{v \in S_{\theta,n}^{k}}
-(\pi_\theta)_{S_{\theta,n}^{k}}(v \mid x, y_{<n})
+\sum_{b \in S_{\theta,n}^{k} \cup \{\tau_{S_{\theta,n}^{k}}\}}
+\pi_\theta^{[S_{\theta,n}^{k}]}(b \mid h_n)
 \log
-\frac{(\pi_\theta)_{S_{\theta,n}^{k}}(v \mid x, y_{<n})}
-{(\pi_T)_{S_{\theta,n}^{k}}(v \mid x, y_{<n})}.
+\frac{\pi_\theta^{[S_{\theta,n}^{k}]}(b \mid h_n)}
+{\pi_T^{[S_{\theta,n}^{k}]}(b \mid h_n)}.
 \label{eq:topk_reverse_kl}
 \end{equation}
 
 \begin{figure}[h]
     \centering
     \includegraphics[width=0.8\linewidth]{figures/topk_forward_vs_reverse_kl.png}
-    \caption{Top-$K$ approximation of the forward and reverse KL. Instead of summing over the full vocabulary $V$, only the $K$ tokens with the highest teacher (forward) or student (reverse) probability are retained.}
+    \caption{Top-$K$ approximation of the forward and reverse KL. Instead of summing over the full vocabulary $V$, the $K$ tokens with the highest teacher (forward) or student (reverse) probability are retained explicitly and the remaining vocabulary is grouped into a tail bucket.}
     \label{fig:topk_forward_vs_reverse_kl}
 \end{figure}
 
-In this thesis, we also use a variant that keeps the reverse-KL direction but selects the top-$k$ support from the teacher. We call this loss the \emph{Teacher-Support Reverse KL} (TS-RKL), because it uses the student-to-teacher KL ratio on the teacher-selected token set:
+In this thesis, we also use a variant that keeps the reverse-KL direction but selects the top-$k$ support from the teacher. We call this loss the \emph{Teacher-Support Reverse KL} (TS-RKL), because it uses the student-to-teacher KL ratio on the teacher-selected buckets:
 
 \begin{equation}
 \widehat{D}_{\mathrm{TS\mbox{-}RKL}}^{k}
 (\pi_\theta \| \pi_T)(y \mid x)
 =
 \sum_{n=1}^{L_y}
-\sum_{v \in S_{T,n}^{k}}
-(\pi_\theta)_{S_{T,n}^{k}}(v \mid x, y_{<n})
+\sum_{b \in S_{T,n}^{k} \cup \{\tau_{S_{T,n}^{k}}\}}
+\pi_\theta^{[S_{T,n}^{k}]}(b \mid h_n)
 \log
-\frac{(\pi_\theta)_{S_{T,n}^{k}}(v \mid x, y_{<n})}
-{(\pi_T)_{S_{T,n}^{k}}(v \mid x, y_{<n})}.
+\frac{\pi_\theta^{[S_{T,n}^{k}]}(b \mid h_n)}
+{\pi_T^{[S_{T,n}^{k}]}(b \mid h_n)}.
 \label{eq:teacher_support_reverse_kl}
 \end{equation}
 
-TS-RKL is not the standard top-$k$ reverse KL in Equation~\ref{eq:topk_reverse_kl}, because the retained support is chosen by the teacher rather than the student. The objective is still reverse KL in direction: the log-ratio is $\log \pi_\theta - \log \pi_T$ and the expectation is over the student distribution after renormalizing on the retained set. The difference is that the approximation focuses the comparison on tokens the teacher considers plausible, which is useful when we want reverse-KL behavior while anchoring the approximation to the teacher's high-probability region.
+TS-RKL is not the standard top-$k$ reverse KL in Equation~\ref{eq:topk_reverse_kl}, because the explicit token buckets are chosen by the teacher rather than the student. The objective is still reverse KL in direction: the log-ratio is $\log \pi_\theta - \log \pi_T$ and the expectation is over the student distribution on the teacher-induced buckets. The difference is that the approximation focuses the comparison on tokens the teacher considers plausible while still preserving one aggregate bucket for the remaining tail mass.
 
 \section{Privileged Context}
 
