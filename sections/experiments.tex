@@ -90,9 +90,10 @@ $\pi_\theta(\cdot \mid x, y_{<n})$: it sees the original prompt and the same
 completion prefix, but never the PC.
 \end{tcolorbox}
 
+\noindent
+\begin{minipage}[t]{0.48\textwidth}
 \begin{tcblisting}{
     enhanced,
-    breakable,
     listing only,
     title={Teacher scoring context},
     fonttitle=\bfseries,
@@ -127,10 +128,11 @@ for $ a > 0 $.
 ---
 ### Step 1: Simplify the expression ...
 \end{tcblisting}
-
+\end{minipage}%
+\hfill
+\begin{minipage}[t]{0.48\textwidth}
 \begin{tcblisting}{
     enhanced,
-    breakable,
     listing only,
     title={Student scoring context},
     fonttitle=\bfseries,
@@ -163,6 +165,7 @@ for $ a > 0 $.
 ---
 ### Step 1: Simplify the expression ...
 \end{tcblisting}
+\end{minipage}
 
 PC can improve top-1 OPD for the tiny student and can preserve GPQA in some settings, but PC+RKL does not currently improve the main AIME results. Therefore PC should be framed as a conditional teacher-side aid, not the core solution.
 
