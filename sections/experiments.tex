@@ -1,47 +1,49 @@
 \chapter{Experiments}
 
-\section{Experimental Setup}
-
-\subsection{Data}
-
-All training runs use prompts from DeepMath-103K \cite{he2025DeepMath103KLargeScaleChallenging}, a large-scale mathematical reasoning dataset available on Hugging Face\footnote{https://huggingface.co/datasets/zwhe99/DeepMath-103K}. This dataset is well matched to our target setting because it contains difficult, verifiable mathematics problems rather than general instruction-following prompts. The problems span a broad range of mathematical topics and were designed to be challenging and decontaminated from common evaluation benchmarks. We use the prompts as the common input distribution across all methods so that differences between runs can be attributed to the distillation objective and teacher choice rather than to differences in task selection.
-
-The training target depends on the distillation setting. In the off-policy setting, the teacher first generates completions for the DeepMath prompts, and the resulting prompt--completion pairs are then used as a fixed training dataset for the student. In the on-policy setting, the prompt set remains fixed, but the completions are sampled from the current student during training and scored by the teacher. This separation lets us compare whether the student benefits more from imitating teacher-generated trajectories or from receiving teacher feedback on its own trajectories.
-
-For experiments that require precomputed teacher data, we generate the teacher completions with DataTrove \cite{penedo2024datatrove} using the hyperparameters described in Appendix~\ref{app: hyperparameters}. We make the generated datasets available on Hugging Face.
-
-\subsection{Models and Inference}
-
-We use the Qwen3 model family \cite{yangQwen3TechnicalReport2025} to study different levels of the capacity gap. Keeping teacher and student within the same model family is important because architecture, tokenizer, training data, and chat-template differences can introduce stylistic and distributional mismatches that are unrelated to model size. Those mismatches can degrade distillation performance and obscure the specific effect of the teacher--student capacity gap \cite{liRethinkingOnPolicyDistillation2026}. We include preliminary experiments with different model families in Appendix~\ref{app: different_model_family}, but the main experiments focus on Qwen3.
-
-Specifically, we use Qwen3-0.6B and Qwen3-4B in non-thinking mode as students, and Qwen3-4B-Instruct, Qwen3-30B-A3B-Instruct-2507, and Qwen3-235B-A22B-Instruct-2507 as teachers. For the initial student models, we modify only the chat template, not the weights, to force non-thinking mode. This ensures that the student remains in the intended inference mode throughout training and preserves the baseline behavior reported by the Qwen team.
-
-We use the DistillationTrainer in TRL \cite{vonwerra2020trl} for the training process and vLLM \cite{kwon2023efficient} to generate student rollouts and teacher log probabilities. The 4B teacher fits on the same GPUs used for training, while the 30B and 235B teachers are served through separate vLLM servers. Throughout the experiments, student training uses 4 nodes with 8 NVIDIA H100 GPUs each. The 30B teacher uses 1 additional serving node, and the 235B teacher uses 2 additional serving nodes.
-
-\subsection{Benchmarks}
-
-Our target capability is mathematical reasoning, so AIME25 \cite{aime25} is the main evaluation benchmark for the experiments. AIME is a competition-style high-school mathematics exam with short numeric answers. The problems require multi-step algebraic, geometric, combinatorial, and number-theoretic reasoning, and they are difficult to solve by pattern matching alone. This makes AIME25 a useful endpoint for measuring whether distillation improves the kind of structured mathematical reasoning targeted by DeepMath-103K.
-
-We also evaluate on two auxiliary benchmarks to measure whether training on mathematics improves the target capability at the cost of broader behavior. GPQA \cite{reinGPQAGraduateLevelGoogleProof2023} measures graduate-level scientific reasoning through multiple-choice questions written by domain experts in biology, physics, and chemistry. The questions are designed to be difficult for skilled non-experts even with web access, so performance on GPQA gives a signal about whether the model preserves harder out-of-domain reasoning skills. IFEval \cite{zhou2023instructionfollowingevaluationlargelanguage} measures instruction following using prompts with automatically verifiable constraints, such as required keywords, formatting rules, or length restrictions. We include it because reasoning fine-tuning and distillation can change a model's compliance with explicit user instructions even when the training data is not directly about instruction following.
-
-We run all evaluations with the Inspect library \cite{UK_AI_Security_Institute_Inspect_AI_Framework_2024}. Using the same evaluation harness across checkpoints keeps prompting, sampling, answer extraction, and scoring consistent, which is especially important when comparing small changes between distillation objectives and teacher sizes.
-
+\section{Scaling the Teacher}
 
 \begin{figure}
     \centering
-    \includegraphics[width=0.9\linewidth]{figures/teacher_scaling_methods_06B_4B.png}
+    \includegraphics[width=0.9\linewidth]{figures/teacher_scaling_aime_top1.png}
     \caption{Caption}
     \label{fig: aime_score_scaling}
 \end{figure}
 
 \begin{figure}
     \centering
-    \includegraphics[width=0.9\linewidth]{figures/teacher_scaling_gap_recovery_06B_4B.png}
+    \includegraphics[width=0.9\linewidth]{figures/teacher_scaling_gap_recovery.png}
     \caption{Caption}
     \label{fig: aime_gap_scaling}
 \end{figure}
 
+\section{Extending from top-1 to top-k Log-Probabilities}
 
+\begin{figure}
+    \centering
+    \includegraphics[width=0.9\linewidth]{figures/teacher_scaling_gap_recovery_top_k.png}
+    \caption{Caption}
+    \label{fig: top-k_gap_scaling}
+\end{figure}
+
+
+
+\section{Sample Efficiency}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.9\linewidth]{figures/learning_curves_aime_qwen3_0.6b.png}
+    \caption{Caption}
+    \label{fig: pc_0.6B_learning_curve}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.9\linewidth]{figures/learning_curves_aime_qwen3_4b.png}
+    \caption{Caption}
+    \label{fig: pc_4B_learning_curve}
+\end{figure}
+
+\section{Using TAID with On-Policy Rollouts and RKL}
 
 \section{The capacity gap appears clearly under naive off-policy distillation}
 
