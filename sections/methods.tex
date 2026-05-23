@@ -175,7 +175,7 @@ Analogously, the standard top-$k$ reverse KL uses the student top-$k$ set, becau
     \label{fig:topk_forward_vs_reverse_kl}
 \end{figure}
 
-For reasons explained in Section [?], we also use a variant that keeps the reverse-KL direction but selects the top-$k$ support from the teacher. We call this loss the \emph{Teacher-Support Reverse KL} (TS-RKL), because it uses the student-to-teacher KL ratio on the teacher-selected buckets:
+For reasons explained by the support metrics in Section~\ref{sec:metrics}, we also use a variant that keeps the reverse-KL direction but selects the top-$k$ support from the teacher. We call this loss the \emph{Teacher-Support Reverse KL} (TS-RKL), because it uses the student-to-teacher KL ratio on the teacher-selected buckets:
 
 \begin{equation}
 \widehat{D}_{\mathrm{TS\mbox{-}RKL}}^{k}
@@ -253,20 +253,383 @@ As in Equation~\ref{eq:sampled_token_reverse_kl}, a top-1 sampled-token approxim
 This formulation makes the role of privileged context explicit. The sampled token and student probability are computed without access to $c$, while the teacher probability is computed with access to $c$. The loss therefore transfers the behavior induced by the privileged context into a student policy that must operate without it.
 
 \section{Metrics}
+\label{sec:metrics}
 
-Besides the loss functions we track throughout training, we use additional metrics to measure quantitatively the behavior throughout the distillation process.
+Besides the loss functions we track throughout training, we use additional metrics to measure how much teacher signal is visible to the student and how much of that signal is likely to be learnable. Unless stated otherwise, all token-level metrics are computed at a fixed prefix $h_n = (x,y_{<n})$, with student distribution $\pi(v)=\pi_\theta(v\mid h_n)$ and teacher distribution $q(v)=\pi_T(v\mid h_n)$. For a context-conditioned teacher, $q(v)$ is replaced by $\pi_T(v\mid x,c,y_{<n})$.
 
-\textbf{Top-K Overlap.}
-
-\textbf{Mass Coverage.} Besides the overlap in the top-k elements, we are also interested in how much of the total probability mass is covered by the overlap in the top-k. We define this separate metric because probability mass is usually concentrated in a few elements in the vocabulary.
-
-\textbf{Gap Recovery Rate.} We are not interested in the final performance of the student, but also in how much of the teacher performance we are able to recover from the teacher. For that purpose, we use the gap recovery rate \cite{liRethinkingOnPolicyDistillation2026} to measure how much of the capabilities of the teacher are transferred to the student 
-
+\textbf{Top-$K$ sets and overlap.}
+For any distribution $r$ over the vocabulary, define
 \begin{equation}
-    \frac{\text{Acc}_{\text{After}} - \text{Acc}_{\text{Before}}}{\text{Acc}_{\text{Teacher}} - \text{Acc}_{\text{Before}}},
+\mathrm{TopK}_K(r)
+= \{ \text{the } K \text{ tokens with largest } r(v) \}.
+\end{equation}
+We write $T_K=\mathrm{TopK}_K(q)$ for the teacher top-$K$ set and $S_M=\mathrm{TopK}_M(\pi)$ for the student top-$M$ set. The top-$M$/top-$K$ overlap count and Jaccard overlap are
+\begin{equation}
+\mathrm{overlap\_count}@M,K
+= |S_M \cap T_K|,
+\qquad
+\mathrm{overlap\_jaccard}@M,K
+=
+\frac{|S_M \cap T_K|}{|S_M \cup T_K|}.
+\label{eq:topmk_overlap}
+\end{equation}
+The top-10 Jaccard metric in the diagnostics is the special case $M=K=10$. We also track whether the student top-1 token is in $T_K$ and whether the teacher top-1 token is in $S_M$.
+
+\textbf{Mass coverage.}
+Set overlap alone ignores how probability mass is distributed inside the sets. The main reverse-KL support metric is the amount of student probability mass covered by the teacher top-$K$ support:
+\begin{equation}
+\mathrm{student\_mass\_in\_teacher\_topK}@K
+=
+\sum_{v\in T_K}\pi(v),
+\qquad
+\mathrm{student\_mass\_outside\_teacher\_topK}@K
+=
+1-\sum_{v\in T_K}\pi(v).
+\label{eq:student_mass_teacher_topk}
+\end{equation}
+When comparing the student top-$M$ set against the teacher top-$K$ set, we also use the mass-covered overlap
+\begin{equation}
+\mathrm{student\_topM\_mass\_in\_teacher\_topK}@M,K
+=
+\sum_{v\in S_M\cap T_K}\pi(v),
+\label{eq:student_topm_mass_teacher_topk}
+\end{equation}
+and the corresponding teacher mass on student top-$M$ tokens,
+\begin{equation}
+\mathrm{teacher\_topK\_mass\_on\_student\_topM}@M,K
+=
+\sum_{v\in S_M\cap T_K}q(v).
+\label{eq:teacher_topk_mass_student_topm}
+\end{equation}
+These mass-weighted metrics are central for reverse KL because reverse KL is an expectation under the student distribution.
+
+\textbf{Top-10 conditional Jensen-Shannon divergence.}
+For two teacher distributions $q_A$ and $q_B$, we compare their returned top-10 distributions by first forming $U=T_{10}^{A}\cup T_{10}^{B}$. Each distribution is restricted to its own top-10 set, missing tokens in $U$ receive a small probability $\epsilon$ (default $10^{-12}$), and the result is renormalized over $U$. If these conditional distributions are $\widetilde{q}_A$ and $\widetilde{q}_B$, then
+\begin{equation}
+\mathrm{JS}_{10}(A,B)
+=
+\frac{1}{2}D_{\mathrm{KL}}(\widetilde{q}_A\|m)
++
+\frac{1}{2}D_{\mathrm{KL}}(\widetilde{q}_B\|m),
+\qquad
+m=\frac{1}{2}(\widetilde{q}_A+\widetilde{q}_B).
+\label{eq:top10_conditional_js}
+\end{equation}
+This is a top-10-conditional JS divergence, not a full-distribution JS divergence.
+
+\textbf{Top-1 agreement and change rates.}
+For any two teacher conditions $A$ and $B$ evaluated on the same prefix, let $a_A$ and $a_B$ denote their top-1 tokens. The top-1 agreement and change rates are
+\begin{equation}
+\mathrm{same\_top1\_rate}(A,B)
+=
+\mathrm{mean}\left[\mathbf{1}\{a_A=a_B\}\right],
+\qquad
+\mathrm{different\_top1\_rate}(A,B)
+=
+1-\mathrm{same\_top1\_rate}(A,B).
+\end{equation}
+The prompt-sensitivity metric $\mathrm{top1\_change\_rate}_{A,B}$ is the same quantity as $\mathrm{different\_top1\_rate}(A,B)$. For three prompt levels $L1,L2,L3$, we also compute
+\begin{equation}
+\mathrm{all\_same\_top1\_rate}
+=
+\mathrm{mean}\left[\mathbf{1}\{a_{L1}=a_{L2}=a_{L3}\}\right],
+\qquad
+\mathrm{any\_prompt\_changes\_top1\_rate}
+=
+1-\mathrm{all\_same\_top1\_rate}.
 \end{equation}
 
-where $\text{Acc}_\text{Before}$ and $\text{Acc}_\text{After}$ correspond to the performance of the student before and after training, respectively.
+\textbf{Reachability and student support.}
+For a teacher token $v$, the student negative log-likelihood is
+\begin{equation}
+\mathrm{NLL}_{S}(v)=-\log \pi(v).
+\end{equation}
+The student rank of $v$ is
+\begin{equation}
+\mathrm{rank}_{S}(v)
+=
+1+\left|\{u\in V:\pi(u)>\pi(v)\}\right|.
+\end{equation}
+We use the configurable default bands from the diagnostics:
+\begin{equation}
+\begin{array}{lll}
+\text{too close} & \text{if} & \mathrm{NLL}_{S}(v)<0.25,\\
+\text{reachable} & \text{if} & 0.25\leq \mathrm{NLL}_{S}(v)\leq 8.0,\\
+\text{too far} & \text{if} & \mathrm{NLL}_{S}(v)>8.0.
+\end{array}
+\label{eq:reachability_bands}
+\end{equation}
+For teacher top-$K$ diagnostics that normalize over the returned teacher set, define
+\begin{equation}
+q_K^{\mathrm{cond}}(v)
+=
+\frac{q(v)}{\sum_{u\in T_K}q(u)}
+\quad\text{for }v\in T_K.
+\end{equation}
+The teacher top-$K$ reachable mass, expected student NLL, and minimum student NLL are
+\begin{equation}
+\mathrm{teacher\_topK\_reachable\_mass}
+=
+\sum_{v\in T_K}q_K^{\mathrm{cond}}(v)\mathbf{1}\{v\text{ is reachable}\},
+\end{equation}
+\begin{equation}
+\mathrm{teacher\_topK\_expected\_student\_NLL}
+=
+\sum_{v\in T_K}q_K^{\mathrm{cond}}(v)\mathrm{NLL}_{S}(v),
+\qquad
+\mathrm{teacher\_topK\_min\_student\_NLL}
+=
+\min_{v\in T_K}\mathrm{NLL}_{S}(v).
+\end{equation}
+We say that the teacher top-$K$ set contains a reachable alternative when the teacher top-1 token is too far but at least one token in $T_K$ is reachable.
+
+\textbf{Student entropy and OPD utility.}
+The full student entropy and its normalized version are
+\begin{equation}
+H(\pi)=-\sum_{v\in V}\pi(v)\log \pi(v),
+\qquad
+H_{\mathrm{norm}}(\pi)=\frac{H(\pi)}{\log |V|}.
+\end{equation}
+For a teacher top-1 token $a_T$, let $d_T=\mathrm{NLL}_{S}(a_T)$. Using student-specific calibration quantiles, we normalize the teacher-token NLL and student entropy as
+\begin{equation}
+\widehat{d}
+=
+\mathrm{clip}\left(
+\frac{d_T-q05_{\mathrm{nll}}}{q95_{\mathrm{nll}}-q05_{\mathrm{nll}}+\epsilon},0,1
+\right),
+\qquad
+\widehat{h}
+=
+\mathrm{clip}\left(
+\frac{H_{\mathrm{norm}}-q05_{\mathrm{entropy}}}{q95_{\mathrm{entropy}}-q05_{\mathrm{entropy}}+\epsilon},0,1
+\right).
+\end{equation}
+The soft-OR utility proxy is
+\begin{equation}
+\mathrm{soft\_or}
+=
+\widehat{h}+\widehat{d}-\widehat{h}\widehat{d},
+\qquad
+\mathrm{reachable\_soft\_or}
+=
+\mathrm{soft\_or}\cdot \mathbf{1}\{a_T\text{ is reachable}\}.
+\end{equation}
+The Q-bucket proxy separates high- and low-entropy/high- and low-NLL cases: Q1 has $\widehat{h}\geq0.65$ and $\widehat{d}\geq0.65$; Q2 has $\widehat{h}\geq0.65$ and $\widehat{d}<0.35$; Q3 has $\widehat{h}<0.35$ and $\widehat{d}\geq0.65$; Q4 has $\widehat{h}<0.35$ and $\widehat{d}<0.35$.
+
+\textbf{Top-1 bottleneck and extractability.}
+For a larger teacher $L$ and a smaller teacher $M$, we compute prefix-averaged rates with the indicator function $\mathbf{1}\{\cdot\}$:
+\begin{equation}
+\mathrm{hard\_label\_same\_rate}
+=
+\mathrm{mean}\left[\mathbf{1}\{a_L=a_M\}\right],
+\end{equation}
+\begin{equation}
+\mathrm{top10\_diff\_hidden\_by\_top1\_rate}
+=
+\mathrm{mean}\left[\mathbf{1}\{a_L=a_M\ \text{and}\ \mathrm{JS}_{10}(L,M)\geq0.10\}\right],
+\end{equation}
+\begin{equation}
+\mathrm{larger\_teacher\_unreachable\_top1\_rate}
+=
+\mathrm{mean}\left[\mathbf{1}\{a_L\neq a_M\ \text{and}\ a_L\text{ is too far}\}\right],
+\end{equation}
+\begin{equation}
+\mathrm{larger\_teacher\_reachable\_difference\_rate}
+=
+\mathrm{mean}\left[\mathbf{1}\{a_L\neq a_M\ \text{and}\ a_L\text{ is reachable}\}\right].
+\end{equation}
+The top-$K$ rescue rate is
+\begin{equation}
+\mathrm{topK\_rescue\_rate}
+=
+\mathrm{mean}\left[
+\mathbf{1}\{
+(a_L\text{ is too far}\ \text{or}\ a_L=a_M)
+\quad \text{and}\quad
+\exists v\in T_K^{L}: v\neq a_S,\ v\text{ is reachable}
+\}
+\right],
+\label{eq:topk_rescue_rate}
+\end{equation}
+where $a_S$ is the student top-1 token. The top-1 extractability proxy is the larger-teacher reachable-difference rate, and the top-$K$ extractability proxy adds the top-$K$ rescue rate.
+
+\textbf{Bucketed reverse-KL support.}
+When returned teacher log probabilities are full-distribution probabilities rather than top-$K$-renormalized probabilities, we compute a coarse reverse-KL diagnostic over the teacher top-$K$ partition $T_K\cup\{\mathrm{OTHER}\}$:
+\begin{equation}
+q_K(v)=q(v),\quad
+\pi_K(v)=\pi(v)
+\quad\text{for }v\in T_K,
+\end{equation}
+\begin{equation}
+q_K(\mathrm{OTHER})
+=
+\max\left(\epsilon,1-\sum_{v\in T_K}q(v)\right),
+\qquad
+\pi_K(\mathrm{OTHER})
+=
+\max\left(\epsilon,1-\sum_{v\in T_K}\pi(v)\right).
+\end{equation}
+The bucketed reverse KL is
+\begin{equation}
+\mathrm{bucketed\_RKL}@K
+=
+\sum_{v\in T_K}\pi_K(v)\left[\log \pi_K(v)-\log q_K(v)\right]
++
+\pi_K(\mathrm{OTHER})
+\left[
+\log \pi_K(\mathrm{OTHER})-\log q_K(\mathrm{OTHER})
+\right].
+\label{eq:bucketed_rkl_metric}
+\end{equation}
+We report the visible-token contribution,
+\begin{equation}
+\mathrm{visible\_token\_rkl\_contribution}@K
+=
+\sum_{v\in T_K}\pi_K(v)\left[\log \pi_K(v)-\log q_K(v)\right],
+\end{equation}
+the OTHER-bucket contribution,
+\begin{equation}
+\mathrm{other\_bucket\_rkl\_contribution}@K
+=
+\pi_K(\mathrm{OTHER})
+\left[
+\log \pi_K(\mathrm{OTHER})-\log q_K(\mathrm{OTHER})
+\right],
+\end{equation}
+and the fraction of bucketed reverse KL from the OTHER bucket,
+\begin{equation}
+\mathrm{other\_bucket\_fraction\_of\_bucketed\_RKL}@K
+=
+\frac{\mathrm{other\_bucket\_rkl\_contribution}@K}
+{\max(\epsilon,\mathrm{bucketed\_RKL}@K)}.
+\end{equation}
+This is a coarse partition diagnostic, not exact full-vocabulary reverse KL.
+
+\textbf{Common-partition teacher comparison.}
+For teacher comparisons, especially 30B versus 235B, let
+\begin{equation}
+U_K=T_K^{A}\cup T_K^{B}.
+\end{equation}
+Because teacher log probabilities may only be available for returned top-$N$ tokens, we separately track the fraction of $U_K$ scored by both teachers, student mass on $U_K$, student mass on tokens scored by both teachers, and student mass on tokens visible to only one teacher. On the subset $B_K\subseteq U_K$ scored by both teachers, the student-mass-weighted advantage of teacher $B$ over teacher $A$ is
+\begin{equation}
+\mathrm{advantage}_{B/A}@K
+=
+\sum_{v\in B_K}\pi(v)\left[\log q_B(v)-\log q_A(v)\right],
+\end{equation}
+with normalized version
+\begin{equation}
+\mathrm{normalized\_advantage}_{B/A}@K
+=
+\frac{\sum_{v\in B_K}\pi(v)\left[\log q_B(v)-\log q_A(v)\right]}
+{\max\left(\epsilon,\sum_{v\in B_K}\pi(v)\right)}.
+\end{equation}
+For $B=$235B and $A=$30B, a positive value means that the larger teacher assigns higher log probability on the visible student-supported subset.
+
+\textbf{Privileged-context support effect.}
+Let $T_K^{c}$ denote the teacher top-$K$ set with privileged context and $T_K^{0}$ the corresponding set without privileged context. The reverse-KL support effect of privileged context is
+\begin{equation}
+\Delta \mathrm{coverage}@K
+=
+\sum_{v\in T_K^{c}}\pi(v)
+-
+\sum_{v\in T_K^{0}}\pi(v).
+\end{equation}
+For bucketed reverse KL, we use
+\begin{equation}
+\Delta\mathrm{bucketed\_RKL}@K
+=
+\mathrm{bucketed\_RKL}_{\mathrm{without\ PC}}@K
+-
+\mathrm{bucketed\_RKL}_{\mathrm{with\ PC}}@K,
+\end{equation}
+so positive values mean that privileged context lowers the coarse reverse-KL mismatch. We also track
+\begin{equation}
+\mathrm{student\_mass\_added\_by\_PC}@K
+=
+\sum_{v\in T_K^{c}\setminus T_K^{0}}\pi(v),
+\qquad
+\mathrm{student\_mass\_removed\_by\_PC}@K
+=
+\sum_{v\in T_K^{0}\setminus T_K^{c}}\pi(v).
+\end{equation}
+For the top-1 privileged-context influence metrics, let $a_c$ and $a_0$ be the teacher top-1 tokens with and without privileged context. We compute
+\begin{equation}
+\mathrm{context\_top1\_change\_rate}
+=
+\mathrm{mean}\left[\mathbf{1}\{a_c\neq a_0\}\right],
+\end{equation}
+\begin{equation}
+\mathrm{context\_changes\_to\_reachable\_token\_rate}
+=
+\mathrm{mean}\left[\mathbf{1}\{a_c\neq a_0\ \text{and}\ a_c\text{ is reachable}\}\right],
+\end{equation}
+\begin{equation}
+\mathrm{context\_changes\_to\_too\_far\_token\_rate}
+=
+\mathrm{mean}\left[\mathbf{1}\{a_c\neq a_0\ \text{and}\ a_c\text{ is too far}\}\right].
+\end{equation}
+The context top-10 Jaccard and conditional JS metrics are computed by applying Equations~\ref{eq:topmk_overlap} and~\ref{eq:top10_conditional_js} to the with-context and without-context teacher distributions.
+
+\textbf{Reverse-KL-visible rescue.}
+The reverse-KL-visible rescue metric is the mass-weighted version of the top-$K$ rescue diagnostic. For student top-1 token $a_S$, define
+\begin{equation}
+R_K
+=
+\{v\in T_K : v\neq a_S\ \text{and}\ v\text{ is reachable}\}.
+\end{equation}
+Then
+\begin{equation}
+\mathrm{rkl\_visible\_rescue\_mass}@K
+=
+\sum_{v\in R_K}\pi(v),
+\qquad
+\mathrm{teacher\_mass\_on\_rescue\_tokens}@K
+=
+\sum_{v\in R_K}q(v),
+\qquad
+\mathrm{rescue\_token\_count}@K
+=
+|R_K|.
+\end{equation}
+We mark a prefix as having reverse-KL-visible rescue when the rescue mass exceeds a chosen threshold.
+
+\textbf{Prompt support sensitivity and top-$K$ sufficiency.}
+For two teacher prompts $p$ and $p'$, prompt support sensitivity is measured by the absolute coverage change
+\begin{equation}
+\left|
+\sum_{v\in T_K^{p}}\pi(v)
+-
+\sum_{v\in T_K^{p'}}\pi(v)
+\right|,
+\end{equation}
+the Jaccard overlap between $T_K^p$ and $T_K^{p'}$, the student mass on tokens that enter or leave $T_K$, and the rate at which the absolute coverage change is at least $0.01$. To assess whether a chosen top-$K$ is large enough, we compute
+\begin{equation}
+\mathrm{coverage\_gain}_{10\rightarrow50}
+=
+\mathrm{coverage}@50-\mathrm{coverage}@10,
+\qquad
+\mathrm{coverage\_gain}_{50\rightarrow100}
+=
+\mathrm{coverage}@100-\mathrm{coverage}@50,
+\end{equation}
+with analogous gains for bucketed reverse KL and reverse-KL-visible rescue mass. If a larger returned top-$N$ set is available, we also compute
+\begin{equation}
+\mathrm{coverage\_gap}_{100\rightarrow N}
+=
+\mathrm{student\_mass\_in\_teacher\_returned\_topN}
+-
+\mathrm{student\_mass\_in\_teacher\_top100}.
+\end{equation}
+
+\textbf{Gap Recovery Rate.}
+We are not only interested in the final performance of the student, but also in how much of the teacher performance the student recovers. For that purpose, we use the gap recovery rate \cite{liRethinkingOnPolicyDistillation2026}:
+\begin{equation}
+\mathrm{GapRecovery}
+=
+\frac{\mathrm{Acc}_{\mathrm{After}}-\mathrm{Acc}_{\mathrm{Before}}}
+{\mathrm{Acc}_{\mathrm{Teacher}}-\mathrm{Acc}_{\mathrm{Before}}},
+\end{equation}
+where $\mathrm{Acc}_{\mathrm{Before}}$ and $\mathrm{Acc}_{\mathrm{After}}$ are the student performance before and after training, respectively.
 
 \section{The Engineering of OPD with Large Teachers}
 
