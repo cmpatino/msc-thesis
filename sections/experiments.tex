@@ -66,6 +66,104 @@ Bucketed RKL exposes more of the teacher distribution and works best for the 4B 
 
 \section{Privileged context is useful but not a general solution}
 
+\begin{tcolorbox}[
+    enhanced,
+    breakable,
+    colback=gray!3,
+    colframe=black!60,
+    coltitle=white,
+    title={Teacher and student contexts for log-probability scoring},
+    fonttitle=\bfseries,
+    boxrule=0.6pt,
+    arc=1.5mm,
+    left=2mm,
+    right=2mm,
+    top=1.5mm,
+    bottom=1.5mm
+]
+For privileged-context distillation, the same completion is scored by both
+models, but the conditioning context differs. The teacher is evaluated as
+$\pi_T(\cdot \mid x, c, y_{<n})$: the user turn contains the original prompt
+plus the privileged context (PC), and the assistant turn contains the
+completion prefix. The student is evaluated as
+$\pi_\theta(\cdot \mid x, y_{<n})$: it sees the original prompt and the same
+completion prefix, but never the PC.
+\end{tcolorbox}
+
+\begin{tcblisting}{
+    enhanced,
+    breakable,
+    listing only,
+    title={Teacher scoring context},
+    fonttitle=\bfseries,
+    coltitle=white,
+    colback=blue!2,
+    colframe=blue!55!black,
+    boxrule=0.6pt,
+    arc=1.5mm,
+    left=2mm,
+    right=2mm,
+    top=1.5mm,
+    bottom=1.5mm,
+    listing options={
+        basicstyle=\ttfamily\scriptsize,
+        breaklines=true,
+        columns=fullflexible,
+        keepspaces=true,
+        showstringspaces=false
+    }
+}
+<|im_start|>user
+Evaluate the limit: $$\lim_{x\to 0}x \left[ \frac{a}{x}\right]$$ for $a>0$.
+
+Privileged context: Your logits are being used to train a 4B model
+<|im_end|>
+<|im_start|>assistant
+<think>
+</think>
+We are given the limit:
+$$ \lim_{x \to 0^+} x \left[ \frac{a}{x} \right] $$
+for $ a > 0 $.
+---
+### Step 1: Simplify the expression ...
+\end{tcblisting}
+
+\begin{tcblisting}{
+    enhanced,
+    breakable,
+    listing only,
+    title={Student scoring context},
+    fonttitle=\bfseries,
+    coltitle=white,
+    colback=green!2,
+    colframe=green!45!black,
+    boxrule=0.6pt,
+    arc=1.5mm,
+    left=2mm,
+    right=2mm,
+    top=1.5mm,
+    bottom=1.5mm,
+    listing options={
+        basicstyle=\ttfamily\scriptsize,
+        breaklines=true,
+        columns=fullflexible,
+        keepspaces=true,
+        showstringspaces=false
+    }
+}
+<|im_start|>user
+Evaluate the limit: $$\lim_{x\to 0}x \left[ \frac{a}{x}\right]$$ for $a>0$.
+<|im_end|>
+<|im_start|>assistant
+<think>
+</think>
+We are given the limit:
+$$ \lim_{x \to 0^+} x \left[ \frac{a}{x} \right] $$
+for $ a > 0 $.
+---
+### Step 1: Simplify the expression ...
+\end{tcblisting}
+
 PC can improve top-1 OPD for the tiny student and can preserve GPQA in some settings, but PC+RKL does not currently improve the main AIME results. Therefore PC should be framed as a conditional teacher-side aid, not the core solution.
 
 \section{Different PC is not useful to improve performance}
