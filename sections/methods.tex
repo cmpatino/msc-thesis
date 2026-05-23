@@ -136,7 +136,7 @@ q(b \mid h_n), & b \in S, \\
 \label{eq:tail_bucket_distribution}
 \end{equation}
 
-This construction preserves a coarse notion of the tail probability that is ignored by the top-$k$ token list. For example, with $k=5$, the first five buckets are the five selected tokens and the sixth bucket is the total probability mass assigned to every other token. This has three benefits over renormalizing the selected tokens. First, it keeps the top-$k$ probabilities on their original scale, so a model that assigns $90\%$ probability mass to the selected tokens is not treated the same as a model that assigns only $40\%$ mass to them. Second, it allows the loss to penalize disagreements about how much probability should remain in the long tail, even though the individual tail tokens are not represented. Third, it avoids artificially inflating the selected tokens when the model is uncertain and spreads probability mass across many low-probability alternatives.
+This construction preserves a coarse notion of the tail probability that is ignored by the top-$k$ token list. For example, with $k=10$, the first ten buckets are the ten selected tokens and the eleventh bucket is the total probability mass assigned to every other token. This has three benefits over renormalizing the selected tokens. First, it keeps the top-$k$ probabilities on their original scale, so a model that assigns $90\%$ probability mass to the selected tokens is not treated the same as a model that assigns only $40\%$ mass to them. Second, it allows the loss to penalize disagreements about how much probability should remain in the long tail, even though the individual tail tokens are not represented. Third, it avoids artificially inflating the selected tokens when the model is uncertain and spreads probability mass across many low-probability alternatives.
 
 The standard top-$k$ forward KL uses the teacher top-$k$ set, because the expectation in the forward KL is taken under the teacher distribution. Both the teacher and student are evaluated on the same teacher-induced buckets $S_{T,n}^{k} \cup \{\tau_{S_{T,n}^{k}}\}$:
 
@@ -175,7 +175,7 @@ Analogously, the standard top-$k$ reverse KL uses the student top-$k$ set, becau
     \label{fig:topk_forward_vs_reverse_kl}
 \end{figure}
 
-In this thesis, we also use a variant that keeps the reverse-KL direction but selects the top-$k$ support from the teacher. We call this loss the \emph{Teacher-Support Reverse KL} (TS-RKL), because it uses the student-to-teacher KL ratio on the teacher-selected buckets:
+For reasons explained in Section [?], we also use a variant that keeps the reverse-KL direction but selects the top-$k$ support from the teacher. We call this loss the \emph{Teacher-Support Reverse KL} (TS-RKL), because it uses the student-to-teacher KL ratio on the teacher-selected buckets:
 
 \begin{equation}
 \widehat{D}_{\mathrm{TS\mbox{-}RKL}}^{k}
@@ -235,7 +235,7 @@ D_{\mathrm{KL}}(\pi_\theta \| \pi_T^c)(\hat{y} \mid x, c)
 \label{eq:privileged_context_distillation}
 \end{equation}
 
-where $\mathcal{D}_{\mathrm{PI}}$ is a dataset of prompts paired with privileged context. This objective keeps the rollout distribution on-policy with respect to the student, but computes the teacher probabilities using the stronger context $(x,c)$. In the self-distillation case of \cite{penalozaPrivilegedInformationDistillation2026}, the teacher and student can share parameters and differ only in their input context. In our more general notation, $\pi_T$ may also be a separate teacher model; the defining property is that only the teacher receives $c$.
+where $\mathcal{D}_{\mathrm{PI}}$ is a dataset of prompts paired with privileged context. This objective keeps the rollout distribution on-policy with respect to the student, but computes the teacher probabilities using the stronger context $(x,c)$. In the self-distillation case, the teacher and student can share parameters and differ only in their input context. In our more general notation and in this thesis, $\pi_T$ is a separate teacher model. The defining property of privileged context is that only the teacher receives $c$.
 
 As in Equation~\ref{eq:sampled_token_reverse_kl}, a top-1 sampled-token approximation keeps only the token actually produced by the student:
 
@@ -250,4 +250,24 @@ As in Equation~\ref{eq:sampled_token_reverse_kl}, a top-1 sampled-token approxim
 \label{eq:privileged_context_sampled_reverse_kl}
 \end{equation}
 
-This formulation makes the role of privileged context explicit: the sampled token and student probability are computed without access to $c$, while the teacher probability is computed with access to $c$. The loss therefore transfers the behavior induced by the privileged context into a student policy that must operate without it.
+This formulation makes the role of privileged context explicit. The sampled token and student probability are computed without access to $c$, while the teacher probability is computed with access to $c$. The loss therefore transfers the behavior induced by the privileged context into a student policy that must operate without it.
+
+\section{Metrics}
+
+Besides the loss functions we track throughout training, we use additional metrics to measure quantitatively the behavior throughout the distillation process.
+
+\textbf{Top-K Overlap.}
+
+\textbf{Mass Coverage.} Besides the overlap in the top-k elements, we are also interested in how much of the total probability mass is covered by the overlap in the top-k. We define this separate metric because probability mass is usually concentrated in a few elements in the vocabulary.
+
+\textbf{Gap Recovery Rate.} We are not interested in the final performance of the student, but also in how much of the teacher performance we are able to recover from the teacher. For that purpose, we use the gap recovery rate \cite{liRethinkingOnPolicyDistillation2026} to measure how much of the capabilities of the teacher are transferred to the student 
+
+\begin{equation}
+    \frac{\text{Acc}_{\text{After}} - \text{Acc}_{\text{Before}}}{\text{Acc}_{\text{Teacher}} - \text{Acc}_{\text{Before}}},
+\end{equation}
+
+where $\text{Acc}_\text{Before}$ and $\text{Acc}_\text{After}$ correspond to the performance of the student before and after training, respectively.
+
+\section{The Engineering of OPD with Large Teachers}
+
+Distillation requires having access to log probabilities from the teacher and the student to calculate the loss functions. Additionally, OPD introduces the challenge of generating rollouts for each prompt on-the-fly because the rollouts need to come from current student policy $\pi_\theta$. These two requirements impose a large load in terms of the GPUs we need to have available during training.

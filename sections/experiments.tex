@@ -1,11 +1,65 @@
 \chapter{Experiments}
 
-\section{Data}
+\section{Experimental Setup}
 
-\section{Models}
+\subsection{Data}
 
-\section{Off- vs. On-Policy Distillation}
+We used the prompts in the DeepMath-103K dataset\cite{he2025DeepMath103KLargeScaleChallenging} available in Hugging Face\footnote{https://huggingface.co/datasets/zwhe99/DeepMath-103K} to train all the models. 
 
-\section{Inclusion of Privileged Context}
+For the experiments which required off-policy data from the teacher, we generated the datasets using Datatrove \cite{penedo2024datatrove} with the hyperparameters detailed in Appendix ??. We make the datasets available in Hugging Face.
 
-\section{Increasing Coverage through Top-K}
+\subsection{Models and Inference}
+
+The best family of models to explore different levels of the capacity gap curse were Qwen3 models \cite{yangQwen3TechnicalReport2025}. Controlling for the same family between models is important to isolate effects that can come from different model architectures and training datasets that introduce style differences between the teacher and the student and degrade distillation performance [CITE]. We give some preliminary studies on the effect of using different model families in Appendix~\ref{app: different_model_family}.
+
+Specifically we used Qwen3-0.6B and Qwen-4B in no thinking mode as students and Qwen3-4B-Instruct, Qwen3-30B-A3B-Instruct-2507, and Qwen3-235B-A22B-Instruct-2507 as teachers. An important detail about the initial student models is that we had to modify the chat template without modifying the weights to force the model to enter in non-thinking mode. That way we guarantee that the student model is always in non-thinking mode and preserves the performance reported by the Qwen team.
+
+We use the DistillationTrainer in TRL \cite{vonwerra2020trl} for the training process and vLLM \cite{kwon2023efficient} to generate the rollouts from the student and the log probabilities from the teacher. We load the 4B teacher in the same GPUs we use for training, but we use separate vLLM servers for the 30B and 235B teachers. Throughout the experiments, we use 4 nodes, each with 8 NVIDIA H100s GPUs, for training. We serve the 30B teacher on 1 node and the 235B teacher on 2 nodes that we use in addition to the 4 nodes we use for training.
+
+\subsection{Benchmarks}
+
+Our target capability is mathematical reasoning, so we chose AIME25 \cite{aime25} as the main evaluation metric for our experiments. We also track scientific reasoning through GPQA \cite{reinGPQAGraduateLevelGoogleProof2023} and instruction following through IFEval \cite{zhou2023instructionfollowingevaluationlargelanguage}
+
+We run all the evaluations using the Inspect library \cite{UK_AI_Security_Institute_Inspect_AI_Framework_2024} using the settings in Table ?? to ensure good statistical significance in our results.
+
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.9\linewidth]{figures/teacher_scaling_methods_06B_4B.png}
+    \caption{Caption}
+    \label{fig: aime_score_scaling}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.9\linewidth]{figures/teacher_scaling_gap_recovery_06B_4B.png}
+    \caption{Caption}
+    \label{fig: aime_gap_scaling}
+\end{figure}
+
+
+
+\section{The capacity gap appears clearly under naive off-policy distillation}
+
+SFT on teacher completions performs poorly, especially for the 0.6B student, and larger teachers make things worse. This establishes the problem.
+
+\section{On-policy distillation is a better teacher-student interface}
+
+OPD substantially improves AIME over SFT for both students and preserves IFEval. This is the main positive result.
+
+\section{Hard top-1 OPD is still information-limited}
+
+Top-1 labels compress the teacher distribution too aggressively. Diagnostics show high top-1 agreement between 30B and 235B teachers, so the larger teacher’s advantage is partly hidden.
+
+
+\section{Distributional top-K objectives partially address that bottleneck}
+
+Bucketed RKL exposes more of the teacher distribution and works best for the 4B student with the 235B teacher. But K=10 is not enough to make the 235B teacher useful for the 0.6B student.
+
+\section{Using an intermediate teacher is useful to address the gap. (?)}
+
+\section{Privileged context is useful but not a general solution}
+
+PC can improve top-1 OPD for the tiny student and can preserve GPQA in some settings, but PC+RKL does not currently improve the main AIME results. Therefore PC should be framed as a conditional teacher-side aid, not the core solution.
+
+\section{Different PC is not useful to improve performance}
