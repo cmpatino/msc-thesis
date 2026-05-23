@@ -6,11 +6,11 @@
 
 We used the prompts in the DeepMath-103K dataset\cite{he2025DeepMath103KLargeScaleChallenging} available in Hugging Face\footnote{https://huggingface.co/datasets/zwhe99/DeepMath-103K} to train all the models. 
 
-For the experiments which required off-policy data from the teacher, we generated the datasets using Datatrove \cite{penedo2024datatrove} with the hyperparameters detailed in Appendix ??. We make the datasets available in Hugging Face.
+For the experiments which required off-policy data from the teacher, we generated the datasets using Datatrove \cite{penedo2024datatrove} with the hyperparameters detailed in Appendix~\ref{app: hyperparameters}. We make the datasets available in Hugging Face.
 
 \subsection{Models and Inference}
 
-The best family of models to explore different levels of the capacity gap curse were Qwen3 models \cite{yangQwen3TechnicalReport2025}. Controlling for the same family between models is important to isolate effects that can come from different model architectures and training datasets that introduce style differences between the teacher and the student and degrade distillation performance [CITE]. We give some preliminary studies on the effect of using different model families in Appendix~\ref{app: different_model_family}.
+The best family of models to explore different levels of the capacity gap curse were Qwen3 models \cite{yangQwen3TechnicalReport2025}. Controlling for the same family between models is important to isolate effects that can come from different model architectures and training datasets that introduce style differences between the teacher and the student and degrade distillation performance \cite{liRethinkingOnPolicyDistillation2026}. We give some preliminary studies on the effect of using different model families in Appendix~\ref{app: different_model_family} but focus on models within the Qwen3 family.
 
 Specifically we used Qwen3-0.6B and Qwen-4B in no thinking mode as students and Qwen3-4B-Instruct, Qwen3-30B-A3B-Instruct-2507, and Qwen3-235B-A22B-Instruct-2507 as teachers. An important detail about the initial student models is that we had to modify the chat template without modifying the weights to force the model to enter in non-thinking mode. That way we guarantee that the student model is always in non-thinking mode and preserves the performance reported by the Qwen team.
 
