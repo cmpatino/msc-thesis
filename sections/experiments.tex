@@ -1,18 +1,18 @@
 \chapter{Experiments}
 
-\section{Scaling the Teacher}
+\section{Using OPD and Privileged Context}
 
 \begin{figure}
     \centering
     \includegraphics[width=0.9\linewidth]{figures/teacher_scaling_aime_top1.png}
-    \caption{Caption}
+    \caption{AIME scores comparing an off-policy distillation method (SFT) with OPD distillation methods. The plots clearly show that using OPD results in better performance for both students regardless the teacher size. Furthermore, performance degrades more for SFT compared to OPD + PC when the teacher size increases, but this effect is seen more clearly in Figure~\ref{fig: aime_gap_scaling}.}
     \label{fig: aime_score_scaling}
 \end{figure}
 
 \begin{figure}
     \centering
     \includegraphics[width=0.9\linewidth]{figures/teacher_scaling_gap_recovery.png}
-    \caption{Caption}
+    \caption{Figure showing the gap recovery rate for all student-teacher combinations. The performance of the 0.6B degrades as we increase the teacher size and the decline is more pronounced for SFT followed by OPD with privileged context. Conversely, the privileged context helps to mitigate the decline for the 4B student and is the method that has the best performance when using the 235B teacher.}
     \label{fig: aime_gap_scaling}
 \end{figure}
 
@@ -20,27 +20,107 @@
 
 \begin{figure}
     \centering
-    \includegraphics[width=0.9\linewidth]{figures/teacher_scaling_gap_recovery_top_k.png}
-    \caption{Caption}
-    \label{fig: top-k_gap_scaling}
+    \includegraphics[width=0.9\linewidth]{figures/best_aime_vs_top_k.png}
+    \caption{Effect of increasing the top-k log probabilities. The 0.6B benefits from increasing K for the smallest teacher, but its performance degrades when using more logprobs from the 235B teacher. These results suggest that the 0.6B student cannot capture the increasing complexity of the large teacher but benefits from more details from a teacher within its reach. For the 4B student, scaling K does not have a positive impact since its performance remains constant or decreases for all teachers.}
+    \label{fig: top-k_effect}
 \end{figure}
 
 
+\begin{figure}
+    \centering
+    \begin{minipage}[t]{0.48\textwidth}
+\begin{tcblisting}{
+    enhanced,
+    listing only,
+    title={Student Scoring Context},
+    fonttitle=\bfseries,
+    coltitle=white,
+    colback=blue!2,
+    colframe=blue!55!black,
+    boxrule=0.6pt,
+    arc=1.5mm,
+    left=2mm,
+    right=2mm,
+    top=1.5mm,
+    bottom=1.5mm,
+    equal height group=scoringctx,
+    listing options={
+        basicstyle=\ttfamily\scriptsize,
+        breaklines=true,
+        columns=fullflexible,
+        keepspaces=true,
+        showstringspaces=false,
+        escapeinside={(*@}{@*)}
+    }
+}
+<|im_start|>user
+Evaluate the limit: $$\lim_{x\to 0}x \left[ \frac{a}{x}\right]$$ for $a>0$.
+<|im_end|>
+<|im_start|>assistant
+<think>
+</think>
+We are given the limit:
+$$ \lim_{x \to 0^+} x \left[ \frac{a}{x} \right] $$
+for $ a > 0 $.
+---
+### Step 1: Simplify the expression ...
+\end{tcblisting}
+\end{minipage}%
+\hfill
+\begin{minipage}[t]{0.48\textwidth}
+\begin{tcblisting}{
+    enhanced,
+    listing only,
+    title={Teacher Scoring Context},
+    fonttitle=\bfseries,
+    coltitle=white,
+    colback=green!2,
+    colframe=green!45!black,
+    boxrule=0.6pt,
+    arc=1.5mm,
+    left=2mm,
+    right=2mm,
+    top=1.5mm,
+    bottom=1.5mm,
+    equal height group=scoringctx,
+    listing options={
+        basicstyle=\ttfamily\scriptsize,
+        breaklines=true,
+        columns=fullflexible,
+        keepspaces=true,
+        showstringspaces=false,
+        escapeinside={(*@}{@*)}
+    }
+}
+<|im_start|>user
+Evaluate the limit: $$\lim_{x\to 0}x \left[ \frac{a}{x}\right]$$ for $a>0$.
+
+(*@{\bfseries\color{blue!70!black} Your logits are being used to train a 4B model}@*)
+
+<|im_end|>
+<|im_start|>assistant
+<think>
+</think>
+We are given the limit:
+$$ \lim_{x \to 0^+} x \left[ \frac{a}{x} \right] $$
+for $ a > 0 $.
+---
+### Step 1: Simplify the expression ...
+\end{tcblisting}
+\end{minipage}
+    \caption{Example showing the difference between $\pi_\theta(\cdot \mid x, y_{<n})$ (Student Scoring Context) and $\pi_T(\cdot \mid x, c, y_{<n})$ (Teacher Scoring Context). The privileged context is \emph{Your logits are being used to train a 4B model} we add to the user turn the teacher sees when generating the logits, and it is the only difference between the text scored by the student and teacher policies.}
+    \label{fig: pc_example}
+\end{figure}
 
 \section{Sample Efficiency}
 
-\begin{figure}
-    \centering
-    \includegraphics[width=0.9\linewidth]{figures/learning_curves_aime_qwen3_0.6b.png}
-    \caption{Caption}
-    \label{fig: pc_0.6B_learning_curve}
-\end{figure}
+\section{Catastrophic Forgetting}
 
 \begin{figure}
     \centering
-    \includegraphics[width=0.9\linewidth]{figures/learning_curves_aime_qwen3_4b.png}
-    \caption{Caption}
-    \label{fig: pc_4B_learning_curve}
+    \includegraphics[width=0.9\linewidth]{figures/teacher_scaling_gpqa_top1.png}
+    \caption{Scores for GPQA for all students while training targeting math reasoning skills. The plots show how the 0.6B student suffers from catastrophic forgetting for the three methods, but also how SFT is the method that degrades performance the most. For the 4B student, all methods preserve the GPQA performance and even marginally improve it. These results show how the main driver in catastrophic forgetting is model capacity, and that on-policy methods are better to mitigate performance degradation.}
+    \label{fig: gpqa_forgetting}
 \end{figure}
 
 \section{Using TAID with On-Policy Rollouts and RKL}
@@ -66,106 +146,7 @@ Bucketed RKL exposes more of the teacher distribution and works best for the 4B 
 
 \section{Privileged context is useful but not a general solution}
 
-\begin{tcolorbox}[
-    enhanced,
-    breakable,
-    colback=gray!3,
-    colframe=black!60,
-    coltitle=white,
-    title={Teacher and student contexts for log-probability scoring},
-    fonttitle=\bfseries,
-    boxrule=0.6pt,
-    arc=1.5mm,
-    left=2mm,
-    right=2mm,
-    top=1.5mm,
-    bottom=1.5mm
-]
-For privileged-context distillation, the same completion is scored by both
-models, but the conditioning context differs. The teacher is evaluated as
-$\pi_T(\cdot \mid x, c, y_{<n})$: the user turn contains the original prompt
-plus the privileged context (PC), and the assistant turn contains the
-completion prefix. The student is evaluated as
-$\pi_\theta(\cdot \mid x, y_{<n})$: it sees the original prompt and the same
-completion prefix, but never the PC.
-\end{tcolorbox}
 
-\noindent
-\begin{minipage}[t]{0.48\textwidth}
-\begin{tcblisting}{
-    enhanced,
-    listing only,
-    title={Teacher scoring context},
-    fonttitle=\bfseries,
-    coltitle=white,
-    colback=blue!2,
-    colframe=blue!55!black,
-    boxrule=0.6pt,
-    arc=1.5mm,
-    left=2mm,
-    right=2mm,
-    top=1.5mm,
-    bottom=1.5mm,
-    listing options={
-        basicstyle=\ttfamily\scriptsize,
-        breaklines=true,
-        columns=fullflexible,
-        keepspaces=true,
-        showstringspaces=false
-    }
-}
-<|im_start|>user
-Evaluate the limit: $$\lim_{x\to 0}x \left[ \frac{a}{x}\right]$$ for $a>0$.
-
-Privileged context: Your logits are being used to train a 4B model
-<|im_end|>
-<|im_start|>assistant
-<think>
-</think>
-We are given the limit:
-$$ \lim_{x \to 0^+} x \left[ \frac{a}{x} \right] $$
-for $ a > 0 $.
----
-### Step 1: Simplify the expression ...
-\end{tcblisting}
-\end{minipage}%
-\hfill
-\begin{minipage}[t]{0.48\textwidth}
-\begin{tcblisting}{
-    enhanced,
-    listing only,
-    title={Student scoring context},
-    fonttitle=\bfseries,
-    coltitle=white,
-    colback=green!2,
-    colframe=green!45!black,
-    boxrule=0.6pt,
-    arc=1.5mm,
-    left=2mm,
-    right=2mm,
-    top=1.5mm,
-    bottom=1.5mm,
-    listing options={
-        basicstyle=\ttfamily\scriptsize,
-        breaklines=true,
-        columns=fullflexible,
-        keepspaces=true,
-        showstringspaces=false
-    }
-}
-<|im_start|>user
-Evaluate the limit: $$\lim_{x\to 0}x \left[ \frac{a}{x}\right]$$ for $a>0$.
-<|im_end|>
-<|im_start|>assistant
-<think>
-</think>
-We are given the limit:
-$$ \lim_{x \to 0^+} x \left[ \frac{a}{x} \right] $$
-for $ a > 0 $.
----
-### Step 1: Simplify the expression ...
-\end{tcblisting}
-\end{minipage}
 
 PC can improve top-1 OPD for the tiny student and can preserve GPQA in some settings, but PC+RKL does not currently improve the main AIME results. Therefore PC should be framed as a conditional teacher-side aid, not the core solution.
 
