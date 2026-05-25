@@ -769,3 +769,36 @@
   address = {Online}
 }
 
+@inproceedings{pmlr-v9-ross10a,
+  title = {Efficient Reductions for Imitation Learning},
+  booktitle = {Proceedings of the Thirteenth International Conference on Artificial Intelligence and Statistics},
+  author = {Ross, Stephane and Bagnell, Drew},
+  editor = {Teh, Yee Whye and Titterington, Mike},
+  year = 2010,
+  month = may,
+  series = {Proceedings of Machine Learning Research},
+  volume = {9},
+  pages = {661--668},
+  publisher = {PMLR},
+  address = {Chia Laguna Resort, Sardinia, Italy},
+  abstract = {Imitation Learning, while applied successfully on many large real-world problems, is typically addressed as a standard supervised learning problem, where it is assumed the training and testing data are i.i.d.. This is not true in imitation learning as the learned policy influences the future test inputs (states) upon which it will be tested. We show that this leads to compounding errors and a regret bound that grows quadratically in the time horizon of the task. We propose two alternative algorithms for imitation learning where training occurs over several episodes of interaction. These two approaches share in common that the learner's policy is slowly modified from executing the expert's policy to the learned policy. We show that this leads to stronger performance guarantees and demonstrate the improved performance on two challenging problems: training a learner to play 1) a 3D racing game (Super Tux Kart) and 2) Mario Bros.; given input images from the games and corresponding actions taken by a human expert and near-optimal planner respectively.}
+}
+
+@misc{sang2026CRISPCompressedReasoning,
+  title = {{{CRISP}}: {{Compressed Reasoning}} via {{Iterative Self-Policy Distillation}}},
+  shorttitle = {{{CRISP}}},
+  author = {Sang, Hejian and Xu, Yuanda and Zhou, Zhengze and He, Ran and Wang, Zhipeng and Sun, Jiachen},
+  year = 2026,
+  month = apr,
+  number = {arXiv:2603.05433},
+  eprint = {2603.05433},
+  primaryclass = {cs.LG},
+  publisher = {arXiv},
+  doi = {10.48550/arXiv.2603.05433},
+  urldate = {2026-05-25},
+  abstract = {Reasoning models think out loud, but much of what they say is noise. We introduce CRISP (Compressed Reasoning via Iterative Self-Policy Distillation), a method that teaches models to reason more concisely by distilling their own concise behavior back into themselves. The entire approach reduces to one idea: condition the same model on a ''be concise'' instruction to obtain teacher logits, and minimize per-token reverse KL on the student's own rollouts. No ground-truth answers, no token budgets, no difficulty estimators. Just self-distillation. Yet this simplicity belies surprising sophistication: CRISP automatically compresses easy problems aggressively while preserving the deliberation needed for hard ones. On Qwen3-8B and Qwen3-14B, we achieve 57--59\% token reduction on MATH-500 while improving accuracy by 9--16 points absolute. On AIME 2024, the 14B model gains 10 points with 41\% compression. Ablations show that qualitative conciseness instructions outperform explicit token targets, and periodic teacher refreshes yield a broad stable regime. The method generalizes across model families -- DeepSeek-R1-Distill-Llama-8B improves accuracy by up to 5 points with 17--32\% compression -- and transfers beyond math to multi-step agentic planning (DeepPlanning), reducing token usage by 42--51\% while preserving planning quality. Code is available at https://github.com/HJSang/OPSD\_Reasoning\_Compression.},
+  archiveprefix = {arXiv},
+  keywords = {Computer Science - Machine Learning},
+  file = {/Users/cmpatino/Zotero/storage/YQZWWTEI/Sang et al. - 2026 - CRISP Compressed Reasoning via Iterative Self-Policy Distillation.pdf;/Users/cmpatino/Zotero/storage/JDMXTE72/2603.html}
+}
+
