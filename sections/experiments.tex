@@ -103,6 +103,8 @@ for $ a > 0 $.
     \label{fig: pc_example}
 \end{figure}
 
+\FloatBarrier
+
 \section{Targeted Privileged Context}
 
 The simple PC informing the teacher model that its logits were being used to train a small student can noticeable but small effects. We wanted to know if we could use a richer PC that addressed the main failure modes of the results shown in Figures~\ref{fig: aime_score_scaling} and \ref{fig: aime_gap_scaling}.
@@ -190,13 +192,20 @@ for $ a > 0 $.
 <|im_start|>user
 Evaluate the limit: $$\lim_{x\to 0}x \left[ \frac{a}{x}\right]$$ for $a>0$.
 
-(*@{\bfseries\color{blue!70!black} Your logits are being used to train a 4B model.
+(*@\begin{minipage}[t]{0.95\linewidth}
+\ttfamily\scriptsize\bfseries\color{blue!70!black}
+Your logits are being used to train a 4B model.
 
 Follow these guidelines for your answer:
 
-- Solve the following math problem concisely and correctly. Be direct — avoid unnecessary elaboration, redundant steps, or restating the problem. Focus only on the key reasoning steps needed to reach the answer.
-- Before doing any algebra, write a 3–5 line plan: identify the problem type, pick one method, and commit. Do not enumerate multiple approaches in parallel.
-}@*)
+\begin{itemize}
+    \setlength{\itemsep}{0.15em}
+    \setlength{\topsep}{0.15em}
+    \setlength{\parsep}{0pt}
+    \item Solve the following math problem concisely and correctly. Be direct; avoid unnecessary elaboration, redundant steps, or restating the problem. Focus only on the key reasoning steps needed to reach the answer.
+    \item Before doing any algebra, write a 3--5 line plan: identify the problem type, pick one method, and commit. Do not enumerate multiple approaches in parallel.
+\end{itemize}
+\end{minipage}@*)
 
 <|im_end|>
 <|im_start|>assistant
@@ -230,6 +239,8 @@ for $ a > 0 $.
   \end{tabular}
 \end{table}
 
+\FloatBarrier
+
 \section{Privileged Context vs System Prompt}
 
 A natural question is why we should pass the targeted guidelines as in Figure~\ref{fig: targeted_pc_example} instead of using a system prompt seen directly by the student model. We ran the ablation by adding a system prompt with the same guidelines, as we show in Figure~\ref{fig: system_prompt_example}.
@@ -252,7 +263,6 @@ A natural question is why we should pass the targeted guidelines as in Figure~\r
     right=2mm,
     top=1.5mm,
     bottom=1.5mm,
-    equal height group=scoringctx,
     listing options={
         basicstyle=\ttfamily\scriptsize,
         breaklines=true,
@@ -263,13 +273,20 @@ A natural question is why we should pass the targeted guidelines as in Figure~\r
     }
 }
 <|im_start|>system
-(*@{\bfseries\color{blue!70!black} Your logits are being used to train a 4B model.
+(*@\begin{minipage}[t]{0.95\linewidth}
+\ttfamily\scriptsize\bfseries\color{blue!70!black}
+Your logits are being used to train a 4B model.
 
 Follow these guidelines for your answer:
 
-- Solve the following math problem concisely and correctly. Be direct — avoid unnecessary elaboration, redundant steps, or restating the problem. Focus only on the key reasoning steps needed to reach the answer.
-- Before doing any algebra, write a 3–5 line plan: identify the problem type, pick one method, and commit. Do not enumerate multiple approaches in parallel.
-}@*)
+\begin{itemize}
+    \setlength{\itemsep}{0.15em}
+    \setlength{\topsep}{0.15em}
+    \setlength{\parsep}{0pt}
+    \item Solve the following math problem concisely and correctly. Be direct; avoid unnecessary elaboration, redundant steps, or restating the problem. Focus only on the key reasoning steps needed to reach the answer.
+    \item Before doing any algebra, write a 3--5 line plan: identify the problem type, pick one method, and commit. Do not enumerate multiple approaches in parallel.
+\end{itemize}
+\end{minipage}@*)
 <|im_end|>
 <|im_start|>user
 Evaluate the limit: $$\lim_{x\to 0}x \left[ \frac{a}{x}\right]$$ for $a>0$.
@@ -288,6 +305,7 @@ for $ a > 0 $.
     \label{fig: system_prompt_example}
 \end{figure}
 
+\FloatBarrier
 
 \section{Extending from top-1 to top-k Log-Probabilities}
 
@@ -298,6 +316,8 @@ for $ a > 0 $.
     \label{fig: top-k_effect}
 \end{figure}
 
+\FloatBarrier
+
 \section{Catastrophic Forgetting}
 
 \begin{figure}
@@ -307,3 +327,4 @@ for $ a > 0 $.
     \label{fig: gpqa_forgetting}
 \end{figure}
 
+\FloatBarrier
