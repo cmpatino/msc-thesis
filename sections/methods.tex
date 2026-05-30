@@ -168,13 +168,13 @@ This formulation makes the role of privileged context explicit. The sampled toke
 
 The privileged-context formulation above gives one use of the context $c$: the teacher sees $c$, the student does not, and the loss transfers the behavior induced by $c$ through teacher log-probabilities. More generally, context distillation refers to training procedures in which $c$ contains an instruction or other conditioning signal whose effect we want the trained student to incorporate. The possible mechanisms depend on whether the rollout distribution is off-policy or on-policy.
 
-In off-policy distillation, the rollouts are generated before training by the teacher. Therefore there is only one place where the context can affect the training data: the teacher is prompted with $c$ when producing the completions. The context-conditioned rollout is
+In off-policy distillation, the rollouts are generated before training by the teacher. Therefore the only place where the context can impact training is when the teacher is prompted with $c$ when producing the completions. The context-conditioned rollout is
 
 \begin{equation}
 \hat{y}^c \sim \pi_T(\cdot \mid x,c),
 \end{equation}
 
-and the student is trained to imitate this fixed completion without receiving $c$:
+and the student is trained to imitate this fixed completion:
 
 \begin{equation}
 \mathcal{L}_{\mathrm{CD}}^{\mathrm{off}}(\theta)
@@ -190,7 +190,7 @@ and the student is trained to imitate this fixed completion without receiving $c
 \label{eq:off_policy_context_distillation}
 \end{equation}
 
-This is the same mechanism as SFT on teacher-generated traces, except that the traces come from the context-conditioned teacher. If teacher log-probabilities are also stored, the cross-entropy term can be replaced by the sampled-token forward-KL form from Equation~\ref{eq:sampled_token_forward_kl}, with $\pi_T(\cdot \mid x,\hat{y}_{<n})$ replaced by $\pi_T(\cdot \mid x,c,\hat{y}^c_{<n})$. In either case, off-policy context distillation transfers $c$ only through the teacher rollout: the student learns to mimic outputs that were generated under the instruction in $c$.
+This is the same mechanism as SFT on teacher-generated traces, except that the traces come from the context-conditioned teacher. If teacher log-probabilities are also stored, the cross-entropy term can be replaced by the sampled-token forward-KL form from Equation~\ref{eq:sampled_token_forward_kl}, with $\pi_T(\cdot \mid x,\hat{y}_{<n})$ replaced by $\pi_T(\cdot \mid x,c,\hat{y}^c_{<n})$. In either case, off-policy context distillation transfers $c$ only through the teacher rollout and the student learns to mimic outputs that were generated under the instruction in $c$.
 
 On-policy distillation has two distinct ways to introduce the same context. The first is the privileged-context setting from Section~\ref{sec: methods_pc}. The student generates an ordinary on-policy rollout
 
@@ -244,7 +244,7 @@ The corresponding top-1 reverse-KL objective scores the tokens produced by this 
 \label{eq:on_policy_student_context_distillation}
 \end{equation}
 
-In this variant, $c$ changes the states visited during training because the student generates its own rollouts while aware of the context. This differs from privileged-context distillation, where the rollout distribution is still $\pi_\theta(\cdot \mid x)$ and only the teacher scores with $c$. Both on-policy variants can produce a trained student whose behavior reflects the instruction in $c$: either the instruction is transferred indirectly through teacher log-probabilities, or it directly shapes the student rollouts used for training.
+In this variant, $c$ changes the states visited during training because the student generates its own rollouts while aware of the context. This differs from privileged-context distillation, where the rollout distribution is still $\pi_\theta(\cdot \mid x)$ and only the teacher scores with $c$. Both on-policy variants can produce a trained student whose behavior reflects the instruction in $c$ without incorporating the instruction explicitly during inference.
 
 \section{Top-K KL} \label{sec: top-k_kl}
 
