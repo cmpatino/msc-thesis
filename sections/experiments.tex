@@ -1,6 +1,6 @@
 \chapter{Experiments}
 
-\section{Using OPD and Privileged Context} \label{sec: naive_pc}
+\section{Using OPD and Privileged Context} \label{sec: exps_off_vs_on}
 
 \begin{figure}
     \centering
@@ -105,11 +105,11 @@ for $ a > 0 $.
 
 \FloatBarrier
 
-\section{Targeted Privileged Context}
+\section{Context Distillation vs. Direct System Prompt} \label{sec: exps_system_prompt}
 
 The simple PC informing the teacher model that its logits were being used to train a small student can noticeable but small effects. We wanted to know if we could use a richer PC that addressed the main failure modes of the results shown in Figures~\ref{fig: aime_score_scaling} and \ref{fig: aime_gap_scaling}.
 
-After an error analysis of the models from Section~\ref{sec: naive_pc}, we classified the errors into 5 categories.
+After an error analysis of the students from Section~\ref{sec: naive_pc}, we classified the errors into 5 categories:
 
 \begin{itemize}
     \item \textbf{Truncation:} Generation cut off by the \texttt{max\_tokens} budget before the model produced an \texttt{ANSWER:} line.
@@ -121,7 +121,11 @@ After an error analysis of the models from Section~\ref{sec: naive_pc}, we class
 
 As shown by Table~\ref{tab:aime-error-breakdown}, the predominant errors are truncation and wrong substantive. The truncation issue is especially prevalent in the 0.6B student when scaling the teacher. This is a symptom of the student receiving feedback from a model with more complex reasoning patterns but failing to use those reasoning patterns to reach a solution.
 
-To address the two main failure modes, we included a privileged context that encouraged the student to be succinct and write a plan before doing any calculations that may derail its reasoning. For the succinct guideline, we use a portion of the prompt developed by \cite{sang2026CRISPCompressedReasoning}. We exclude the section that refers to the format expected by AIME to focus on the math reasoning skills instead of on the formatting issues.
+To address the two main failure modes, we included a privileged context that encouraged the student to be succinct and write a plan before doing any calculations that may derail its reasoning. For the succinct guideline, we use a portion of the prompt developed by \cite{sang2026CRISPCompressedReasoning}. We exclude the section that refers to the format expected by AIME to focus on the general math reasoning skills instead of on the formatting issues specific of a benchmark.
+
+\red{Talk about AIME scores when ready}
+
+Besides the AIME scores, we also tracked statistic of the completions length through training and show them in Figure XX. The plot shows how the mean length of the completion goes from around 3500 tokens without the targeted PC to around 2000 tokens with the targeted PC intervention. More importantly, the truncated percentage of rollouts decreases from 70\% without PC to 27\% with PC. This decrease in the average length of the rollouts makes the student model even more efficient as it generates answers in fewer tokens.
 
 \begin{figure}
     \centering
@@ -239,11 +243,22 @@ for $ a > 0 $.
   \end{tabular}
 \end{table}
 
+\begin{figure}
+    \centering
+    \includegraphics[width=0.9\linewidth]{figures/training_metrics_truncation.png}
+    \caption{\red{Actual data but I will probably create a better plot when I have all the trained models with this technique}}
+    \label{fig: rollout_length_stats}
+\end{figure}
+
 \FloatBarrier
 
 \section{Privileged Context vs System Prompt}
 
 A natural question is why we should pass the targeted guidelines as in Figure~\ref{fig: targeted_pc_example} instead of using a system prompt seen directly by the student model. We ran the ablation by adding a system prompt with the same guidelines, as we show in Figure~\ref{fig: system_prompt_example}.
+
+\red{Talk about AIME results when ready}
+
+Figure \ref{fig: rollout_length_stats} compares the effect using the system prompt instead of the privileged context. The plot clearly shows that instructing the student to be concise through the privileged context is more effective than using an identical instruction through the system prompt.
 
 
 \begin{figure}
@@ -307,7 +322,7 @@ for $ a > 0 $.
 
 \FloatBarrier
 
-\section{Extending from top-1 to top-k Log-Probabilities}
+\section{Extending from top-1 to top-k Log-Probabilities} \label{sec: exps_top_k}
 
 \begin{figure}
     \centering
@@ -318,7 +333,7 @@ for $ a > 0 $.
 
 \FloatBarrier
 
-\section{Catastrophic Forgetting}
+\section{Catastrophic Forgetting} \label{sec: exps_forgetting}
 
 \begin{figure}
     \centering
