@@ -1,18 +1,18 @@
 \chapter{Experiments}
 
-\section{Using OPD and Privileged Context} \label{sec: exps_off_vs_on}
+\section{OPD with Privileged Context}
 
 \begin{figure}
     \centering
-    \includegraphics[width=0.9\linewidth]{figures/teacher_scaling_aime_top1.png}
+    \includegraphics[width=0.9\linewidth]{figures/opd_pc_aime.png}
     \caption{AIME scores comparing an off-policy distillation method (SFT) with OPD distillation methods. The plots clearly show that using OPD results in better performance for both students regardless the teacher size. Furthermore, performance degrades more for SFT compared to OPD + PC when the teacher size increases, but this effect is seen more clearly in Figure~\ref{fig: aime_gap_scaling}.}
     \label{fig: aime_score_scaling}
 \end{figure}
 
 \begin{figure}
     \centering
-    \includegraphics[width=0.9\linewidth]{figures/teacher_scaling_gap_recovery.png}
-    \caption{Figure showing the gap recovery rate for all student-teacher combinations. The performance of the 0.6B degrades as we increase the teacher size and the decline is more pronounced for SFT followed by OPD with privileged context. Conversely, the privileged context helps to mitigate the decline for the 4B student and is the method that has the best performance when using the 235B teacher.}
+    \includegraphics[width=0.9\linewidth]{figures/opd_pc_gap_recovery.png}
+    \caption{Figure showing the gap recovery rate for all student-teacher combinations. The performance of the 0.6B degrades as we increase the teacher size and the decline is more pronounced for SFT followed by OPD with privileged context. The privileged context also causes the steepest decline to mitigate for the 4B student but still has better performance than SFT.}
     \label{fig: aime_gap_scaling}
 \end{figure}
 
@@ -122,6 +122,13 @@ After an error analysis of the students from Section~\ref{sec: naive_pc}, we cla
 As shown by Table~\ref{tab:aime-error-breakdown}, the predominant errors are truncation and wrong substantive. The truncation issue is especially prevalent in the 0.6B student when scaling the teacher. This is a symptom of the student receiving feedback from a model with more complex reasoning patterns but failing to use those reasoning patterns to reach a solution.
 
 To address the two main failure modes, we included a privileged context that encouraged the student to be succinct and write a plan before doing any calculations that may derail its reasoning. For the succinct guideline, we use a portion of the prompt developed by \cite{sang2026CRISPCompressedReasoning}. We exclude the section that refers to the format expected by AIME to focus on the general math reasoning skills instead of on the formatting issues specific of a benchmark.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.9\linewidth]{figures/pc_vs_system_gap_recovery.png}
+    \caption{Plot comparing the performance of a privileged context with passing the same information through the system prompt to encourage brevity in the model response. The plots show that using the system prompt instead of the privileged information is more effective in terms of AIME performance.}
+    \label{fig: pc_vs_system_prompt}
+\end{figure}
 
 \red{Talk about AIME scores when ready}
 
@@ -250,16 +257,6 @@ for $ a > 0 $.
     \label{fig: rollout_length_stats}
 \end{figure}
 
-\FloatBarrier
-
-\section{Privileged Context vs System Prompt}
-
-A natural question is why we should pass the targeted guidelines as in Figure~\ref{fig: targeted_pc_example} instead of using a system prompt seen directly by the student model. We ran the ablation by adding a system prompt with the same guidelines, as we show in Figure~\ref{fig: system_prompt_example}.
-
-\red{Talk about AIME results when ready}
-
-Figure \ref{fig: rollout_length_stats} compares the effect using the system prompt instead of the privileged context. The plot clearly shows that instructing the student to be concise through the privileged context is more effective than using an identical instruction through the system prompt.
-
 
 \begin{figure}
     \centering
@@ -321,6 +318,17 @@ for $ a > 0 $.
 \end{figure}
 
 \FloatBarrier
+
+\section{OPD vs Off-Policy Methods} \label{sec: exps_off_vs_on}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.9\linewidth]{figures/off_vs_on_policy.png}
+    \caption{Effect of increasing the top-k log probabilities. The 0.6B benefits from increasing K for the smallest teacher, but its performance degrades when using more logprobs from the 235B teacher. These results suggest that the 0.6B student cannot capture the increasing complexity of the large teacher but benefits from more details from a teacher within its reach. For the 4B student, scaling K does not have a positive impact since its performance remains constant or decreases for all teachers.}
+    \label{fig: opd_vs_off-policy}
+\end{figure}
+
+
 
 \section{Extending from top-1 to top-k Log-Probabilities} \label{sec: exps_top_k}
 
