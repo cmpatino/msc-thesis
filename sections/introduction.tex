@@ -24,8 +24,9 @@ Finally, studying and working on this regime requires addressing both methodolog
 To summarize, our contributions are:
 
 \begin{itemize}
+    \item Showing the effect of using privileged context and on-policy distillation on capacity gaps where the teacher is between 10 and 400 times larger than the student (Section \ref{sec: exp_opd_and_pc}).
+    \item Showing how to use effectively use on-policy context distillation to make the model more token efficient while maintaining performance (Section \ref{sec: exps_system_prompt}).
     \item Showing how OPD distillation performs better than off-policy distillation across different capacity gaps (Section \ref{sec: exps_off_vs_on}). Additionally, we show how using privileged context is not an effective solution to bridge all capacity gaps and that using top-k in large capacity gaps degrade the student's performance (Section \ref{sec: exps_top_k}).
-    \item Comparing on-policy context distillation to using a system prompt during training and showing how context distillation introduces training dynamics that ultimately degrade model performance (Section \ref{sec: exps_system_prompt}).
     \item \red{Catastrophic forgetting results} (Section \ref{sec: exps_forgetting}).
     \item Developing an efficient trainer that is available to the AI community to leverage the benefits of OPD at different capacity gaps.
 \end{itemize}

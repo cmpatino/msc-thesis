@@ -337,8 +337,6 @@ TS-RKL is not the standard top-$k$ reverse KL in Equation~\ref{eq:topk_reverse_k
 \section{Metrics}
 \label{sec:metrics}
 
-Besides the loss functions we track throughout training, we use two additional metrics. Unless stated otherwise, token-level top-$K$ metrics are computed at a fixed prefix $h_n=(x,y_{<n})$, with student distribution $\pi(v)=\pi_\theta(v\mid h_n)$ and teacher distribution $q(v)=\pi_T(v\mid h_n)$. For a context-conditioned teacher, $q(v)$ is replaced by $\pi_T(v\mid x,c,y_{<n})$.
-
 \textbf{Gap Recovery Gap.}
 We are not only interested in the final performance of the student, but also in how much of the teacher performance the student recovers. Following \cite{liRethinkingOnPolicyDistillation2026}, we measure the recovered teacher-student gap as
 \begin{equation}
