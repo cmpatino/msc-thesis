@@ -170,29 +170,13 @@ This formulation makes the role of privileged context explicit. The sampled toke
 
 The privileged-context formulation above gives one use of the context $c$: the teacher sees $c$, the student does not, and the loss transfers the behavior induced by $c$ through teacher log-probabilities. More generally, context distillation refers to training procedures in which $c$ contains an instruction or other conditioning signal whose effect we want the trained student to incorporate. The possible mechanisms depend on whether the rollout distribution is off-policy or on-policy.
 
-In off-policy distillation, the rollouts are generated before training by the teacher. Therefore the only place where the context can impact training is when the teacher is prompted with $c$ when producing the completions. The context-conditioned rollout is
+In off-policy distillation, the rollouts are generated before training by the teacher. Since the student does not generate the training states, the only way for the context to affect training is through the teacher prompt used to produce the completions. The context-conditioned rollout is
 
 \begin{equation}
 \hat{y}^c \sim \pi_T(\cdot \mid x,c),
 \end{equation}
 
-and the student is trained to imitate this fixed completion:
-
-\begin{equation}
-\mathcal{L}_{\mathrm{CD}}^{\mathrm{off}}(\theta)
-=
-\mathrm{E}_{(x,c) \sim \mathcal{D}_{\mathrm{PI}}}
-\left[
-\mathrm{E}_{\hat{y}^c \sim \pi_T(\cdot \mid x,c)}
-\left[
-- \sum_{n=1}^{L_{\hat{y}^c}}
-\log \pi_\theta(\hat{y}^c_n \mid x, \hat{y}^c_{<n})
-\right]
-\right].
-\label{eq:off_policy_context_distillation}
-\end{equation}
-
-This is the same mechanism as SFT on teacher-generated traces, except that the traces come from the context-conditioned teacher. If teacher log-probabilities are also stored, the cross-entropy term can be replaced by the sampled-token forward-KL form from Equation~\ref{eq:sampled_token_forward_kl}, with $\pi_T(\cdot \mid x,\hat{y}_{<n})$ replaced by $\pi_T(\cdot \mid x,c,\hat{y}^c_{<n})$. In either case, off-policy context distillation transfers $c$ only through the teacher rollout and the student learns to mimic outputs that were generated under the instruction in $c$.
+and the student is trained to imitate this fixed completion. This is the same mechanism as SFT on teacher-generated traces in Equation~\ref{eq:xentropy}, except that the traces come from the context-conditioned teacher. If teacher log-probabilities are also stored, the sampled-token forward-KL form from Equation~\ref{eq:sampled_token_forward_kl} can be used instead. In either case, off-policy context distillation transfers $c$ only through the teacher rollout and the student learns to mimic outputs that were generated under the instruction in $c$.
 
 On-policy distillation has two distinct ways to introduce the same context. The first is the privileged-context setting from Section~\ref{sec: methods_pc}. The student generates an ordinary on-policy rollout
 
@@ -200,24 +184,7 @@ On-policy distillation has two distinct ways to introduce the same context. The 
 \hat{y} \sim \pi_\theta(\cdot \mid x),
 \end{equation}
 
-but the teacher scores each prefix with access to $c$. Using the top-1 reverse-KL approximation, this gives the objective in Equation~\ref{eq:privileged_context_sampled_reverse_kl}:
-
-\begin{equation}
-\mathcal{L}_{\mathrm{CD},T}^{\mathrm{on}}(\theta)
-=
-\mathrm{E}_{(x,c) \sim \mathcal{D}_{\mathrm{PI}}}
-\left[
-\mathrm{E}_{\hat{y} \sim \pi_\theta(\cdot \mid x)}
-\left[
-\sum_{n=1}^{L_{\hat{y}}}
-\left(
-\log \pi_\theta(\hat{y}_n \mid x, \hat{y}_{<n})
-- \log \pi_T(\hat{y}_n \mid x,c,\hat{y}_{<n})
-\right)
-\right]
-\right].
-\label{eq:on_policy_teacher_context_distillation}
-\end{equation}
+but the teacher scores each prefix with access to $c$. Using the top-1 reverse-KL approximation, this corresponds to the privileged-context objective in Equation~\ref{eq:privileged_context_sampled_reverse_kl}.
 
 Here $c$ is distilled through the teacher probabilities. The student never observes the context directly, but it is updated toward token choices that the teacher prefers when the teacher is conditioned on $c$.
 
@@ -227,26 +194,7 @@ The second on-policy mechanism is to give the context directly to the student du
 \hat{y}^c \sim \pi_\theta(\cdot \mid x,c).
 \end{equation}
 
-The corresponding top-1 reverse-KL objective scores the tokens produced by this context-aware student:
-
-\begin{equation}
-\mathcal{L}_{\mathrm{CD},S}^{\mathrm{on}}(\theta)
-=
-\mathrm{E}_{(x,c) \sim \mathcal{D}_{\mathrm{PI}}}
-\left[
-\mathrm{E}_{\hat{y}^c \sim \pi_\theta(\cdot \mid x,c)}
-\left[
-\sum_{n=1}^{L_{\hat{y}^c}}
-\left(
-\log \pi_\theta(\hat{y}^c_n \mid x,c,\hat{y}^c_{<n})
-- \log \pi_T(\hat{y}^c_n \mid x,c,\hat{y}^c_{<n})
-\right)
-\right]
-\right].
-\label{eq:on_policy_student_context_distillation}
-\end{equation}
-
-In this variant, $c$ changes the states visited during training because the student generates its own rollouts while aware of the context. This differs from privileged-context distillation, where the rollout distribution is still $\pi_\theta(\cdot \mid x)$ and only the teacher scores with $c$. Both on-policy variants can produce a trained student whose behavior reflects the instruction in $c$ without incorporating the instruction explicitly during inference.
+The same on-policy divergence from Equation~\ref{eq:on_policy_distillation} can then be applied to the tokens produced by this context-aware student, with the teacher evaluated on the same context-conditioned prefixes. In this variant, $c$ changes the states visited during training because the student generates its own rollouts while aware of the context. This differs from privileged-context distillation, where the rollout distribution is still $\pi_\theta(\cdot \mid x)$ and only the teacher scores with $c$. Both on-policy variants can produce a trained student whose behavior reflects the instruction in $c$ without incorporating the instruction explicitly during inference.
 
 \section{Top-K KL} \label{sec: top-k_kl}
 
