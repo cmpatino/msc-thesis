@@ -86,7 +86,7 @@ for $ a > 0 $.
 <|im_start|>user
 Evaluate the limit: $$\lim_{x\to 0}x \left[ \frac{a}{x}\right]$$ for $a>0$.
 
-(*@{\bfseries\color{blue!70!black} Your logits are being used to train a 4B model}@*)
+(*@{\bfseries\color{blue!70!black} You are a 235B teacher and your logits are being used to train a 4B model}@*)
 
 <|im_end|>
 <|im_start|>assistant
@@ -99,7 +99,7 @@ for $ a > 0 $.
 ### Step 1: Simplify the expression ...
 \end{tcblisting}
 \end{minipage}
-    \caption{Example showing the difference between $\pi_\theta(\cdot \mid x, y_{<n})$ (Student Scoring Context) and $\pi_T(\cdot \mid x, c, y_{<n})$ (Teacher Scoring Context). The privileged context is \emph{Your logits are being used to train a 4B model} we add to the user turn the teacher sees when generating the logits, and it is the only difference between the text scored by the student and teacher policies.}
+    \caption{Example showing the difference between $\pi_\theta(\cdot \mid x, y_{<n})$ (Student Scoring Context) and $\pi_T(\cdot \mid x, c, y_{<n})$ (Teacher Scoring Context). The privileged context is \emph{You are a 235B teacher and your logits are being used to train a 4B model} we add to the user turn the teacher sees when generating the logits, and it is the only difference between the text scored by the student and teacher policies.}
     \label{fig: pc_example}
 \end{figure}
 
@@ -107,9 +107,9 @@ for $ a > 0 $.
 
 \section{Context Distillation vs. Direct System Prompt} \label{sec: exps_system_prompt}
 
-The simple PC informing the teacher model that its logits were being used to train a small student can noticeable but small effects. We wanted to know if we could use a richer PC that addressed the main failure modes of the results shown in Figures~\ref{fig: aime_score_scaling} and \ref{fig: aime_gap_scaling}.
+The simple PC informing the teacher model that its logits were being used to train a small student degraded performance compared to using OPD without PC. We wanted to know if we could use different PC that addressed the main failure modes of the results shown in Figures~\ref{fig: aime_score_scaling} and \ref{fig: aime_gap_scaling}.
 
-After an error analysis of the students from Section~\ref{sec: naive_pc}, we classified the errors into 5 categories:
+After an error analysis of the students from Section~\ref{sec: exp_opd_and_pc}, we classified the errors into 5 categories:
 
 \begin{itemize}
     \item \textbf{Truncation:} Generation cut off by the \texttt{max\_tokens} budget before the model produced an \texttt{ANSWER:} line.
@@ -130,7 +130,7 @@ To address the two main failure modes, we included a privileged context that enc
     \label{fig: pc_vs_system_prompt}
 \end{figure}
 
-\red{Talk about AIME scores when ready}
+We show the results of addressing the truncation problem in Figure \ref{fig: pc_vs_system_prompt}. 
 
 Besides the AIME scores, we also tracked statistic of the completions length through training and show them in Figure XX. The plot shows how the mean length of the completion goes from around 3500 tokens without the targeted PC to around 2000 tokens with the targeted PC intervention. More importantly, the truncated percentage of rollouts decreases from 70\% without PC to 27\% with PC. This decrease in the average length of the rollouts makes the student model even more efficient as it generates answers in fewer tokens.
 
