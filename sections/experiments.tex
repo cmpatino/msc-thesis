@@ -34,7 +34,7 @@
     right=2mm,
     top=1.5mm,
     bottom=1.5mm,
-    equal height group=scoringctx,
+    equal height group=pcsimplectx,
     listing options={
         basicstyle=\ttfamily\scriptsize,
         breaklines=true,
@@ -73,7 +73,7 @@ for $ a > 0 $.
     right=2mm,
     top=1.5mm,
     bottom=1.5mm,
-    equal height group=scoringctx,
+    equal height group=pcsimplectx,
     listing options={
         basicstyle=\ttfamily\scriptsize,
         breaklines=true,
@@ -86,7 +86,7 @@ for $ a > 0 $.
 <|im_start|>user
 Evaluate the limit: $$\lim_{x\to 0}x \left[ \frac{a}{x}\right]$$ for $a>0$.
 
-(*@{\bfseries\color{blue!70!black} You are a 235B teacher and your logits are being used to train a 4B model}@*)
+(*@\parbox[t]{0.95\linewidth}{\ttfamily\scriptsize\bfseries\color{blue!70!black}\raggedright You are a 235B teacher and your logits are being used to train a 4B model}@*)
 
 <|im_end|>
 <|im_start|>assistant
@@ -140,20 +140,20 @@ Besides the AIME scores, we also tracked statistic of the completions length thr
 \begin{tcblisting}{
     enhanced,
     listing only,
-    title={Student Scoring Context},
+    title={Privileged Context},
     fonttitle=\bfseries,
     coltitle=white,
-    colback=blue!2,
-    colframe=blue!55!black,
+    colback=green!2,
+    colframe=green!45!black,
     boxrule=0.6pt,
     arc=1.5mm,
     left=2mm,
     right=2mm,
     top=1.5mm,
     bottom=1.5mm,
-    equal height group=scoringctx,
+    equal height group=pcsystemctx,
     listing options={
-        basicstyle=\ttfamily\scriptsize,
+        basicstyle=\ttfamily\tiny,
         breaklines=true,
         columns=fullflexible,
         keepspaces=true,
@@ -163,6 +163,14 @@ Besides the AIME scores, we also tracked statistic of the completions length thr
 }
 <|im_start|>user
 Evaluate the limit: $$\lim_{x\to 0}x \left[ \frac{a}{x}\right]$$ for $a>0$.
+
+(*@\begin{minipage}[t]{0.95\linewidth}
+\ttfamily\tiny\bfseries\color{blue!70!black}\raggedright
+Your logits are being used to train a 4B model.
+
+Solve the following math problem concisely and correctly. Be direct; avoid unnecessary elaboration, redundant steps, or restating the problem. Focus only on the key reasoning steps needed to reach the answer.
+\end{minipage}@*)
+
 <|im_end|>
 <|im_start|>assistant
 <think>
@@ -179,20 +187,20 @@ for $ a > 0 $.
 \begin{tcblisting}{
     enhanced,
     listing only,
-    title={Teacher Scoring Context},
+    title={System Prompt},
     fonttitle=\bfseries,
     coltitle=white,
-    colback=green!2,
-    colframe=green!45!black,
+    colback=orange!3,
+    colframe=orange!60!black,
     boxrule=0.6pt,
     arc=1.5mm,
     left=2mm,
     right=2mm,
     top=1.5mm,
     bottom=1.5mm,
-    equal height group=scoringctx,
+    equal height group=pcsystemctx,
     listing options={
-        basicstyle=\ttfamily\scriptsize,
+        basicstyle=\ttfamily\tiny,
         breaklines=true,
         columns=fullflexible,
         keepspaces=true,
@@ -200,24 +208,14 @@ for $ a > 0 $.
         escapeinside={(*@}{@*)}
     }
 }
+<|im_start|>system
+(*@\begin{minipage}[t]{0.95\linewidth}
+\ttfamily\tiny\bfseries\color{blue!70!black}\raggedright
+Solve the following math problem concisely and correctly. Be direct — avoid unnecessary elaboration, redundant steps, or restating the problem. Focus only on the key reasoning steps needed to reach the answer. However, don't omit verification and prioritize correctness over brevity.
+\end{minipage}@*)
+<|im_end|>
 <|im_start|>user
 Evaluate the limit: $$\lim_{x\to 0}x \left[ \frac{a}{x}\right]$$ for $a>0$.
-
-(*@\begin{minipage}[t]{0.95\linewidth}
-\ttfamily\scriptsize\bfseries\color{blue!70!black}
-Your logits are being used to train a 4B model.
-
-Follow these guidelines for your answer:
-
-\begin{itemize}
-    \setlength{\itemsep}{0.15em}
-    \setlength{\topsep}{0.15em}
-    \setlength{\parsep}{0pt}
-    \item Solve the following math problem concisely and correctly. Be direct; avoid unnecessary elaboration, redundant steps, or restating the problem. Focus only on the key reasoning steps needed to reach the answer.
-    \item Before doing any algebra, write a 3--5 line plan: identify the problem type, pick one method, and commit. Do not enumerate multiple approaches in parallel.
-\end{itemize}
-\end{minipage}@*)
-
 <|im_end|>
 <|im_start|>assistant
 <think>
@@ -229,8 +227,8 @@ for $ a > 0 $.
 ### Step 1: Simplify the expression ...
 \end{tcblisting}
 \end{minipage}
-    \caption{Example showing the privileged context targeted to mitigate the issues with long rollouts.}
-    \label{fig: targeted_pc_example}
+    \caption{Comparison between providing the targeted intervention as privileged context in the user turn seen by the teacher and providing the same intervention directly as a system prompt.}
+    \label{fig: pc_vs_system_prompt_example}
 \end{figure}
 
 \begin{table}[ht]
@@ -255,66 +253,6 @@ for $ a > 0 $.
     \includegraphics[width=0.9\linewidth]{figures/training_metrics_truncation.png}
     \caption{\red{Actual data but I will probably create a better plot when I have all the trained models with this technique}}
     \label{fig: rollout_length_stats}
-\end{figure}
-
-
-\begin{figure}
-    \centering
-    \begin{minipage}[t]{0.9\textwidth}
-\begin{tcblisting}{
-    enhanced,
-    listing only,
-    title={Student Scoring Context},
-    fonttitle=\bfseries,
-    coltitle=white,
-    colback=blue!2,
-    colframe=blue!55!black,
-    boxrule=0.6pt,
-    arc=1.5mm,
-    left=2mm,
-    right=2mm,
-    top=1.5mm,
-    bottom=1.5mm,
-    listing options={
-        basicstyle=\ttfamily\scriptsize,
-        breaklines=true,
-        columns=fullflexible,
-        keepspaces=true,
-        showstringspaces=false,
-        escapeinside={(*@}{@*)}
-    }
-}
-<|im_start|>system
-(*@\begin{minipage}[t]{0.95\linewidth}
-\ttfamily\scriptsize\bfseries\color{blue!70!black}
-Your logits are being used to train a 4B model.
-
-Follow these guidelines for your answer:
-
-\begin{itemize}
-    \setlength{\itemsep}{0.15em}
-    \setlength{\topsep}{0.15em}
-    \setlength{\parsep}{0pt}
-    \item Solve the following math problem concisely and correctly. Be direct; avoid unnecessary elaboration, redundant steps, or restating the problem. Focus only on the key reasoning steps needed to reach the answer.
-    \item Before doing any algebra, write a 3--5 line plan: identify the problem type, pick one method, and commit. Do not enumerate multiple approaches in parallel.
-\end{itemize}
-\end{minipage}@*)
-<|im_end|>
-<|im_start|>user
-Evaluate the limit: $$\lim_{x\to 0}x \left[ \frac{a}{x}\right]$$ for $a>0$.
-<|im_end|>
-<|im_start|>assistant
-<think>
-</think>
-We are given the limit:
-$$ \lim_{x \to 0^+} x \left[ \frac{a}{x} \right] $$
-for $ a > 0 $.
----
-### Step 1: Simplify the expression ...
-\end{tcblisting}
-\end{minipage}
-    \caption{Example showing the privileged context targeted to mitigate the issues with long rollouts.}
-    \label{fig: system_prompt_example}
 \end{figure}
 
 \FloatBarrier
