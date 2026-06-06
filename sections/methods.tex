@@ -285,7 +285,20 @@ TS-RKL is not the standard top-$k$ reverse KL in Equation~\ref{eq:topk_reverse_k
 \section{Metrics}
 \label{sec:metrics}
 
-\textbf{Gap Recovery Gap.}
+\textbf{Top-$k$ Support Coverage.}
+A teacher-support top-$k$ reverse-KL objective can only provide token-level supervision on the tokens in the teacher's top-$k$ set. Student probability mass placed on tokens outside that set is therefore not supervised at the token level. We measure how much of the student's next-token distribution is spanned by the teacher's top-$k$ support. Let $\mathcal{H}_{\mathrm{eval}}$ be the set of prefixes used for evaluation, with each prefix written as $h_n=(x,y_{<n})$. Using the teacher top-$k$ set $S_{T,n}^{k}$ from Equation~\ref{eq:topk_sets}, we define the top-$k$ support coverage as
+\begin{equation}
+\mathrm{Coverage}_{k}
+=
+\frac{1}{|\mathcal{H}_{\mathrm{eval}}|}
+\sum_{h_n \in \mathcal{H}_{\mathrm{eval}}}
+\sum_{v \in S_{T,n}^{k}}
+\pi_\theta(v \mid h_n).
+\label{eq:topk_support_coverage}
+\end{equation}
+This is the student probability mass that falls inside the teacher's top-$k$, averaged over prefixes. Its complement $1-\mathrm{Coverage}_{k}$ is the student mass lying outside the teacher's top-$k$, i.e. the fraction of the student's distribution that a teacher top-$k$ support cannot supervise at the token level.
+
+\textbf{Gap Recovery.}
 We are not only interested in the final performance of the student, but also in how much of the teacher performance the student recovers. Following \cite{liRethinkingOnPolicyDistillation2026}, we measure the recovered teacher-student gap as
 \begin{equation}
 \mathrm{GapRecovery}
