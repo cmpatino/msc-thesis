@@ -4,21 +4,6 @@
 
 \begin{figure}
     \centering
-    \includegraphics[width=0.9\linewidth]{figures/opd_pc_aime.png}
-    \caption{AIME scores comparing an off-policy distillation method (SFT) with OPD distillation methods. The plots clearly show that using OPD results in better performance for both students regardless the teacher size. Furthermore, performance degrades more for SFT compared to OPD + PC when the teacher size increases, but this effect is seen more clearly in Figure~\ref{fig: aime_gap_scaling}.}
-    \label{fig: aime_score_scaling}
-\end{figure}
-
-\begin{figure}
-    \centering
-    \includegraphics[width=0.9\linewidth]{figures/opd_pc_gap_recovery.png}
-    \caption{Figure showing the gap recovery rate for all student-teacher combinations. The performance of the 0.6B degrades as we increase the teacher size and the decline is more pronounced for SFT followed by OPD with privileged context. The privileged context also causes the steepest decline to mitigate for the 4B student but still has better performance than SFT.}
-    \label{fig: aime_gap_scaling}
-\end{figure}
-
-
-\begin{figure}
-    \centering
     \begin{minipage}[t]{0.48\textwidth}
 \begin{tcblisting}{
     enhanced,
@@ -103,11 +88,36 @@ for $ a > 0 $.
     \label{fig: pc_example}
 \end{figure}
 
+
+Our first experiment was checking the impact of a privileged context that gave information to the teacher about itself, the student, and the task. The PC we used is in Figure \ref{fig: pc_example}, where we show how we pass the information to the teacher and how the prompt seen by the student compares to the one seen by the teacher.
+
+Despite being an intervention through PC of less than 50 tokens, it already has a noticeable impact in downstream performance as shown in Figure \ref{fig: aime_score_scaling}. The plots show how distillation, regardless if its off-policy (SFT), on-policy (OPD), or on-policy with privileged context (OPD + PC), does not benefit from using a larger teacher. Despite the 235B teacher being more capable that the 4B and 30B teachers, a student has similar performance in all three cases. What is also clear from these plots is that on-policy methods perform better.
+
+Another conclusion from the plot is that using the privileged context informing the teacher about the distillation task either degrades or maintains performance on math reasoning task. This degradation is seen more clearly in Figure \ref{fig: aime_gap_scaling}, where we show the gap recovery rate we define in Section \ref{sec:metrics}. For the 0.6B student, the recovery rate declines 41\% when scaling from a 4B to a 235B teacher. This decline is more pronounced that when using OPD without PC. A similar pattern emerges for the 4B student: OPD without PC has a smaller degradation when scaling from a 30B to a 235B teacher.
+
+An difference between the two students is how SFT behaves when scaling the teacher. In the 0.6B student, SFT is the method with worse degradation in gap recovery rate with a 50\% decline. Conversely, SFT has the smallest decline among the three methods. \red{I don't really have a reason why this happens.}
+
+Overall, these experiments show that not all interventions with PC are useful and that a short privileged context can already have an impact in downstream performance.
+\begin{figure}
+    \centering
+    \includegraphics[width=0.9\linewidth]{figures/opd_pc_aime.png}
+    \caption{AIME scores comparing an off-policy distillation method (SFT) with OPD distillation methods. The plots clearly show that using OPD results in better performance for both students regardless the teacher size. Furthermore, performance degrades more for SFT compared to OPD + PC when the teacher size increases, but this effect is seen more clearly in Figure~\ref{fig: aime_gap_scaling}.}
+    \label{fig: aime_score_scaling}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.9\linewidth]{figures/opd_pc_gap_recovery.png}
+    \caption{Figure showing the gap recovery rate for all student-teacher combinations. The performance of the 0.6B degrades as we increase the teacher size and the decline is more pronounced for SFT followed by OPD with privileged context. The privileged context also causes the steepest decline to mitigate for the 4B student but still has better performance than SFT.}
+    \label{fig: aime_gap_scaling}
+\end{figure}
+
 \FloatBarrier
+
 
 \section{Context Distillation vs. Direct System Prompt} \label{sec: exps_system_prompt}
 
-The simple PC informing the teacher model that its logits were being used to train a small student degraded performance compared to using OPD without PC. We wanted to know if we could use different PC that addressed the main failure modes of the results shown in Figures~\ref{fig: aime_score_scaling} and \ref{fig: aime_gap_scaling}.
+The simple PC informing the teacher model that its logits were being used to train a small student degraded performance compared to using OPD without PC. We wanted to know if we could use different PC, similar to \cite{yeOnPolicyContextDistillation2026}, that addressed the main failure modes of the results shown in Figures~\ref{fig: aime_score_scaling} and \ref{fig: aime_gap_scaling}.
 
 After an error analysis of the students from Section~\ref{sec: exp_opd_and_pc}, we classified the errors into 5 categories:
 
@@ -121,18 +131,28 @@ After an error analysis of the students from Section~\ref{sec: exp_opd_and_pc}, 
 
 As shown by Table~\ref{tab:aime-error-breakdown}, the predominant errors are truncation and wrong substantive. The truncation issue is especially prevalent in the 0.6B student when scaling the teacher. This is a symptom of the student receiving feedback from a model with more complex reasoning patterns but failing to use those reasoning patterns to reach a solution.
 
-To address the two main failure modes, we included a privileged context that encouraged the student to be succinct and write a plan before doing any calculations that may derail its reasoning. For the succinct guideline, we use a portion of the prompt developed by \cite{sang2026CRISPCompressedReasoning}. We exclude the section that refers to the format expected by AIME to focus on the general math reasoning skills instead of on the formatting issues specific of a benchmark.
+\begin{table}[ht]
+  \centering
+  \caption{Share of incorrect attempts (\% of incorrect) per error category in AIME25.}
+  \label{tab:aime-error-breakdown}
+  \begin{tabular}{l r r r r r}
+    \toprule
+    Student / Teacher & Truncation & Wrong substantive & Off-by-small & Out of range & Format fail \\
+    \midrule
+    4B / 30B       & \textbf{44\%} & \textbf{49\%} & 4\%  & 1\%  & 2\% \\
+    4B / 235B     & \textbf{54\%} & \textbf{42\%} & 3\%  & 1\%  & 0\% \\
+    0.6B / 4B          & 41\%          & \textbf{46\%} & 3\%  & 7\%  & 3\% \\
+    0.6B / 30B     & \textbf{87\%} & 9\%           & 2\%  & 1\%  & 0\% \\
+    0.6B / 235B   & \textbf{86\%} & 11\%          & 1\%  & 2\%  & 0\% \\
+    \bottomrule
+  \end{tabular}
+\end{table}
 
-\begin{figure}
-    \centering
-    \includegraphics[width=0.9\linewidth]{figures/pc_vs_system_gap_recovery.png}
-    \caption{Plot comparing the performance of a privileged context with passing the same information through the system prompt to encourage brevity in the model response. The plots show that using the system prompt instead of the privileged information is more effective in terms of AIME performance.}
-    \label{fig: pc_vs_system_prompt}
-\end{figure}
+To address the two main failure modes, we included the privileged context shown in Figure \ref{fig: pc_vs_system_prompt_example} that encouraged the student to be succinct and write a plan before doing any calculations that may derail its reasoning. For the succinct guideline, we use a portion of the prompt developed by \cite{sang2026CRISPCompressedReasoning}. We exclude the section that refers to the format expected by AIME to focus on the general math reasoning skills instead of on the formatting issues specific of a benchmark.
 
-We show the results of addressing the truncation problem in Figure \ref{fig: pc_vs_system_prompt}. 
+Besides using the privileged context, we also show in Figure \ref{fig: pc_vs_system_prompt_example} how we introduce the same instruction to encourage short rollouts through the system prompt to compare what is the optimal way to steer student behavior in an OPD task. The results in Figure \ref{fig: pc_vs_system_prompt} show how steering the model to address the truncation issue compares to the OPD training runs without that instruction. The plot shows how the system prompt is more effective than using the PC to distill context into the student. 
 
-Besides the AIME scores, we also tracked statistic of the completions length through training and show them in Figure XX. The plot shows how the mean length of the completion goes from around 3500 tokens without the targeted PC to around 2000 tokens with the targeted PC intervention. More importantly, the truncated percentage of rollouts decreases from 70\% without PC to 27\% with PC. This decrease in the average length of the rollouts makes the student model even more efficient as it generates answers in fewer tokens.
+These results intuitively align with the advantage of using OPD. When using the system prompt, we induce the student to generate the rollouts knowing it should try to keep the rollouts as short as possible without sacrificing quality. The student can then visit states that follow that instruction and receive feedback from the teacher on those states. In the privileged context scenario, the student generates the rollouts without the right context because it receives the instruction through the teacher feedback. Receving the feedback through the teacher has the problems of possible re-interpretation of the teacher of what the short rollout means under its policy and of the student not having enough capacity to understand the feedback from the teacher. That is why we achieve equal or better performance than OPD and OPD + PC when using the system prompt directly on the student.
 
 \begin{figure}
     \centering
@@ -140,7 +160,7 @@ Besides the AIME scores, we also tracked statistic of the completions length thr
 \begin{tcblisting}{
     enhanced,
     listing only,
-    title={Privileged Context},
+    title={Privileged Context (Teacher)},
     fonttitle=\bfseries,
     coltitle=white,
     colback=green!2,
@@ -166,11 +186,8 @@ Evaluate the limit: $$\lim_{x\to 0}x \left[ \frac{a}{x}\right]$$ for $a>0$.
 
 (*@\begin{minipage}[t]{0.95\linewidth}
 \ttfamily\tiny\bfseries\color{blue!70!black}\raggedright
-Your logits are being used to train a 4B model.
-
 Solve the following math problem concisely and correctly. Be direct; avoid unnecessary elaboration, redundant steps, or restating the problem. Focus only on the key reasoning steps needed to reach the answer.
 \end{minipage}@*)
-
 <|im_end|>
 <|im_start|>assistant
 <think>
@@ -187,7 +204,7 @@ for $ a > 0 $.
 \begin{tcblisting}{
     enhanced,
     listing only,
-    title={System Prompt},
+    title={System Prompt (Teacher \& Student)},
     fonttitle=\bfseries,
     coltitle=white,
     colback=orange!3,
@@ -227,48 +244,56 @@ for $ a > 0 $.
 ### Step 1: Simplify the expression ...
 \end{tcblisting}
 \end{minipage}
-    \caption{Comparison between providing the targeted intervention as privileged context in the user turn seen by the teacher and providing the same intervention directly as a system prompt.}
+    \caption{Comparison between providing the targeted intervention as privileged context or through a system prompt. The key difference is that the privileged context is only seen by the teacher while the system prompt is seen by the teacher and the student.}
     \label{fig: pc_vs_system_prompt_example}
 \end{figure}
 
-\begin{table}[ht]
-  \centering
-  \caption{Share of incorrect attempts (\% of incorrect) per error category in AIME25.}
-  \label{tab:aime-error-breakdown}
-  \begin{tabular}{l r r r r r}
-    \toprule
-    Student / Teacher & Truncation & Wrong substantive & Off-by-small & Out of range & Format fail \\
-    \midrule
-    4B / 30B       & \textbf{44\%} & \textbf{49\%} & 4\%  & 1\%  & 2\% \\
-    4B / 235B     & \textbf{54\%} & \textbf{42\%} & 3\%  & 1\%  & 0\% \\
-    0.6B / 4B          & 41\%          & \textbf{46\%} & 3\%  & 7\%  & 3\% \\
-    0.6B / 30B     & \textbf{87\%} & 9\%           & 2\%  & 1\%  & 0\% \\
-    0.6B / 235B   & \textbf{86\%} & 11\%          & 1\%  & 2\%  & 0\% \\
-    \bottomrule
-  \end{tabular}
-\end{table}
+\begin{figure}
+    \centering
+    \includegraphics[width=0.9\linewidth]{figures/pc_vs_system_gap_recovery.png}
+    \caption{Plot comparing the performance of a privileged context with passing the same information through the system prompt to encourage brevity in the model response. The plots show that using the system prompt instead of the privileged information is more effective in terms of AIME performance.}
+    \label{fig: pc_vs_system_prompt}
+\end{figure}
+
+\section{Rollout Lengths and Epistemic Tokens}
+
+Besides the AIME scores, we tracked the mean rollout length through training and the length of the responses when solving AIME problems to determine how well PC and the system prompt steered the student model to shorter rollouts. We show the results on Figure \ref{fig: rollout_length}, where we can see the effect of scaling the teacher on the rollout length. The rollout length increases up to 24x for the largest teacher compared to the mean length before training. Also, as we increase the teacher size, the rollouts increase in length as the student tries to absorb the knowledge from the teacher. This behavior is more pronounced in the 0.6B student, which shows how the capacity gap manifests in the rollout length. In other words, the 4B student has a larger capacity than the 0.6B student, so it does not need to increase its rollout length as much as the 0.6B to accommodate the information passed by larger teachers.
+
 
 \begin{figure}
     \centering
-    \includegraphics[width=0.9\linewidth]{figures/training_metrics_truncation.png}
-    \caption{\red{Actual data but I will probably create a better plot when I have all the trained models with this technique}}
-    \label{fig: rollout_length_stats}
+    \includegraphics[width=0.9\linewidth]{figures/pc_vs_system_length.png}
+    \caption{Plots showing how the mean response length explodes for both students after OPD. The figure also shows that scaling the teacher length also causes the rollout length to increase, and that this scaling is more pronounced for the 0.6B teacher.}
+    \label{fig: rollout_length}
 \end{figure}
+
+The increase in rollout length is interesting to study because the students we are training are hybrid models that, despite being trained without reasoning enabled and receiving feedback from instruct teachers, they have a latent capability of enabling their reasoning mode when necessary. The increase of the rollout length is a potential symptom of this reasoning mode taking over in the student model, but a more telling signal is the inclusion of epistemic words in the response. We study the number of epistemic words as defined by \cite{kimWhyDoesSelfDistillation2026} and show our results in Figure \ref{fig: epistemic_words}. The results show that there is an increase of ~13–23 times in the number of epistemic words per rollout compared to the 0.6B student model before distillation. We also see an increase of ~3.5–5× in the 4B student.
+
+Despite the growth in epistemic words compared to the initial student model, we do not the same growth when we scale the model as we saw in Figure \ref{fig: rollout_length} with the rollout length. Instead, the number of epistemic words remains roughly constant for the PC and System Prompt training runs that ask the student model to be succinct. This lack of correlation indicates that the increase in length is not related to directly to reasoning patterns associated to reasoning traces, and instead it is the student model trying to mimic the trace complexity of the teacher model.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.9\linewidth]{figures/pc_vs_system_epistemic.png}
+    \caption{Number of epistemic words per rollout for different types of OPD setups. The plots show how all methods grow the number of epistemic words per rollout for all teachers sizes, but that the behavior does not scale with the teacher size when we instruct the student model to be succint in its answers.}
+    \label{fig: epistemic_words}
+\end{figure}
+
 
 \FloatBarrier
 
-\section{OPD vs Off-Policy Methods} \label{sec: exps_off_vs_on}
+\section{Using the Privileged Context as Teacher Assisted Distillation}
 
-\begin{figure}
-    \centering
-    \includegraphics[width=0.9\linewidth]{figures/off_vs_on_policy.png}
-    \caption{Effect of increasing the top-k log probabilities. The 0.6B benefits from increasing K for the smallest teacher, but its performance degrades when using more logprobs from the 235B teacher. These results suggest that the 0.6B student cannot capture the increasing complexity of the large teacher but benefits from more details from a teacher within its reach. For the 4B student, scaling K does not have a positive impact since its performance remains constant or decreases for all teachers.}
-    \label{fig: opd_vs_off-policy}
-\end{figure}
+One of the first works that addressed the capacity gap proposed progressively distilling from larger teachers until we got to a teacher scale that was reachable to the student \cite{mirzadehImprovedKnowledgeDistillation2019}. For example, in our case we could distill the 235B into the 30B model, then that 30B model into the 4B model, and finally distill that 4B model into our 0.6B student. However, that process would be expensive as it would entail three distillation runs to reach the objective. 
 
-
+We wanted to follow the same idea in the context of OPD and PC that skips incurring in multiple distillation runs. We set up the distillation with the 0.6B student and the 4B teacher, as this combination has a small capacity gap and equivalent performance to other student-teacher combination. Instead of incorporating instructions or information about the problem as in Figures \ref{fig: pc_example} and \ref{fig: pc_vs_system_prompt_example}, we include a rollout of the 30B or 235B teacher for that prompt. That way, the 4B teacher effectively acts as a bridge between the larger teachers and the 0.6B student. We followed an approach similar to \cite{shenfeldSelfDistillationEnablesContinual2026}, where they incorporate demonstrations of GPT-4o to show the student how the problem can be solved.
 
 \section{Extending from top-1 to top-k Log-Probabilities} \label{sec: exps_top_k}
+
+Given that intervening with PC and system prompt was not effective to address the capacity gap curse, we followed the results showing that increasing the number of log-probabilities used for training yielded better student performance in OPD settings \cite{hubotterReinforcementLearningSelfDistillation2026}. Scaling the number of log-probabilities when using a separate server for the teacher is expensive because we need to transfer the log-probabilities from the server with the teacher to the GPUs with the student model \cite{patino2026_distilling_100b_models_40x_faster_with_trl}. For that reason, we only restrict our analysis to $K \in \{1, 10, 50\}$.
+
+We calculated the probability mass coverage, as defined in Section \ref{sec:metrics}, for each K value and student-teacher combination, and saw that the mass coverage increased as we increased K and reached 0.99 coverage with $K=50$. This increase in probability mass coverage indicated that increasing $K$ was promising to improve student performance. However, Figure \ref{fig: top-k_effect} contradicts that hypothesis and shows that AIME scores decrease or stay stable as we increase $K$. The only exception is using the 4B teacher with the 0.6B student, where we see an increase in the performance as we scale $K$.
+
+This behavior presents another symptom of the capacity gap, and shows how a small student struggles to understand feedback from a much larger teacher. In all cases, performance either stayed the same or decreased when using the 30B and 235B teachers. This behavior shows that a larger probability coverage does not immediately means a boost in teacher performance. Additionally, it also shows the challenges of giving effective feedback in scenarios with a large capacity gap.
 
 \begin{figure}
     \centering
@@ -276,16 +301,3 @@ for $ a > 0 $.
     \caption{Effect of increasing the top-k log probabilities. The 0.6B benefits from increasing K for the smallest teacher, but its performance degrades when using more logprobs from the 235B teacher. These results suggest that the 0.6B student cannot capture the increasing complexity of the large teacher but benefits from more details from a teacher within its reach. For the 4B student, scaling K does not have a positive impact since its performance remains constant or decreases for all teachers.}
     \label{fig: top-k_effect}
 \end{figure}
-
-\FloatBarrier
-
-\section{Catastrophic Forgetting} \label{sec: exps_forgetting}
-
-\begin{figure}
-    \centering
-    \includegraphics[width=0.9\linewidth]{figures/teacher_scaling_gpqa_top1.png}
-    \caption{Scores for GPQA for all students while training targeting math reasoning skills. The plots show how the 0.6B student suffers from catastrophic forgetting for the three methods, but also how SFT is the method that degrades performance the most. For the 4B student, all methods preserve the GPQA performance and even marginally improve it. These results show how the main driver in catastrophic forgetting is model capacity, and that on-policy methods are better to mitigate performance degradation.}
-    \label{fig: gpqa_forgetting}
-\end{figure}
-
-\FloatBarrier
