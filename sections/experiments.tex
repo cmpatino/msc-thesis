@@ -255,7 +255,7 @@ for $ a > 0 $.
     \label{fig: pc_vs_system_prompt}
 \end{figure}
 
-\section{Rollout Lengths and Epistemic Words}
+\section{Rollout Lengths and Epistemic Words} \label{sec: exps_rollout_lengths}
 
 Besides the AIME scores, we tracked the mean rollout length during training and the length of the responses when solving AIME problems to determine how well PC and the system prompt steered the student model toward shorter rollouts. We show the results in Figure \ref{fig: rollout_length}, where we can see the effect of scaling the teacher on rollout length. The rollout length increases up to 24x for the largest teacher compared to the mean length before training. As we increase the teacher size, the rollouts also increase in length, suggesting that the student is using longer traces to absorb feedback from the teacher. This behavior is more pronounced in the 0.6B student, which shows how the capacity gap manifests in rollout length. In other words, the 4B student has a larger capacity than the 0.6B student, so it does not need to increase its rollout length as much to accommodate the information passed by larger teachers.
 
