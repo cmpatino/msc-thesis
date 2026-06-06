@@ -1,0 +1,17 @@
+<|im_start|>system
+(*@\begin{minipage}[t]{0.95\linewidth}
+\ttfamily\tiny\bfseries\color{blue!70!black}\raggedright
+Solve the following math problem concisely and correctly. Be direct — avoid unnecessary elaboration, redundant steps, or restating the problem. Focus only on the key reasoning steps needed to reach the answer. However, don't omit verification and prioritize correctness over brevity.
+\end{minipage}@*)
+<|im_end|>
+<|im_start|>user
+Evaluate the limit: $$\lim_{x\to 0}x \left[ \frac{a}{x}\right]$$ for $a>0$.
+<|im_end|>
+<|im_start|>assistant
+<think>
+</think>
+We are given the limit:
+$$ \lim_{x \to 0^+} x \left[ \frac{a}{x} \right] $$
+for $ a > 0 $.
+---
+### Step 1: Simplify the expression ...

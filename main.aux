@@ -1,0 +1,258 @@
+\relax 
+\providecommand \babel@aux [2]{\global \let \babel@toc \@gobbletwo }
+\@nameuse{bbl@beforestart}
+\babel@aux{english}{}
+\citation{hintonDistillingKnowledgeNeural2015}
+\citation{mirzadehImprovedKnowledgeDistillation2019}
+\citation{zhangLiftingCurseCapacity2023}
+\citation{zhangLiftingCurseCapacity2023}
+\citation{mirzadehImprovedKnowledgeDistillation2019}
+\citation{liSmallModelsStruggle2025}
+\citation{shi2021FollowYourPath}
+\citation{shingTAIDTemporallyAdaptive2025}
+\citation{jang2026StableOnPolicyDistillation}
+\@writefile{toc}{\contentsline {chapter}{\numberline {1}Introduction}{1}{}\protected@file@percent }
+\@writefile{lof}{\addvspace {10\p@ }}
+\@writefile{lot}{\addvspace {10\p@ }}
+\citation{team2026KimiK2Open}
+\citation{deepseekai2026deepseekv4}
+\citation{agarwalOnPolicyDistillationLanguage2024}
+\citation{guMiniLLMOnPolicyDistillation2026}
+\citation{luOnPolicyDistillation2025}
+\citation{penalozaPrivilegedInformationDistillation2026}
+\citation{zhaoSelfDistilledReasonerOnPolicy2026}
+\citation{shenfeldSelfDistillationEnablesContinual2026}
+\citation{vonwerra2020trl}
+\citation{patino2026_distilling_100b_models_40x_faster_with_trl}
+\citation{hintonDistillingKnowledgeNeural2015}
+\citation{tan2023GKDGeneralKnowledge}
+\citation{wang2021ERNIE30Titan}
+\citation{huang2025SelecTKDSelectiveTokenWeighted}
+\citation{boizardCrossTokenizerDistillationUniversal2025}
+\citation{minixhoferUniversalCrossTokenizerDistillation2025}
+\citation{yanDistributionAlignedSequenceDistillation2026}
+\citation{zotero-item-425}
+\citation{pmlr-v9-ross10a}
+\citation{agarwalOnPolicyDistillationLanguage2024}
+\citation{guMiniLLMOnPolicyDistillation2026}
+\citation{luOnPolicyDistillation2025}
+\citation{chenRetainingDoingRole2025}
+\citation{armandpourUnmaskingOnPolicyDistillation2026}
+\@writefile{toc}{\contentsline {chapter}{\numberline {2}Related Work}{4}{}\protected@file@percent }
+\@writefile{lof}{\addvspace {10\p@ }}
+\@writefile{lot}{\addvspace {10\p@ }}
+\newlabel{sec:related-work}{{2}{4}{}{chapter.2}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {2.1}Distillation}{4}{}\protected@file@percent }
+\citation{mirzadehImprovedKnowledgeDistillation2019}
+\citation{mirzadehImprovedKnowledgeDistillation2019}
+\citation{zhangLiftingCurseCapacity2023}
+\citation{mirzadehImprovedKnowledgeDistillation2019}
+\citation{shi2021FollowYourPath}
+\citation{zhangLiftingCurseCapacity2023}
+\citation{shingTAIDTemporallyAdaptive2025}
+\citation{huang2025SelecTKDSelectiveTokenWeighted}
+\citation{xu2024SpeculativeKnowledgeDistillation}
+\citation{jang2026StableOnPolicyDistillation}
+\citation{liSmallModelsStruggle2025}
+\citation{askell2021GeneralLanguageAssistant}
+\citation{snell2022LearningDistillingContext}
+\@writefile{toc}{\contentsline {section}{\numberline {2.2}Addressing the capacity gap}{5}{}\protected@file@percent }
+\citation{padmanabhan2023PropagatingKnowledgeUpdates}
+\citation{bhargava2024PromptBaking}
+\citation{shin2025GenerativePromptInternalization}
+\citation{yeOnPolicyContextDistillation2026}
+\citation{penalozaPrivilegedInformationDistillation2026}
+\citation{zhaoSelfDistilledReasonerOnPolicy2026}
+\citation{shenfeldSelfDistillationEnablesContinual2026}
+\citation{hubotterReinforcementLearningSelfDistillation2026}
+\citation{heSelfDistillationZeroSelfRevision2026}
+\citation{yangSelfDistilledRLVR2026}
+\citation{yangSelfDistilledRLVR2026a}
+\citation{kimWhyDoesSelfDistillation2026}
+\@writefile{toc}{\contentsline {section}{\numberline {2.3}Context distillation and privileged context}{6}{}\protected@file@percent }
+\citation{agarwalOnPolicyDistillationLanguage2024}
+\citation{guMiniLLMOnPolicyDistillation2026}
+\citation{guMiniLLMOnPolicyDistillation2026}
+\citation{guMiniLLMOnPolicyDistillation2026}
+\@writefile{toc}{\contentsline {chapter}{\numberline {3}Methods}{8}{}\protected@file@percent }
+\@writefile{lof}{\addvspace {10\p@ }}
+\@writefile{lot}{\addvspace {10\p@ }}
+\@writefile{toc}{\contentsline {section}{\numberline {3.1}Distillation Formalism}{8}{}\protected@file@percent }
+\newlabel{sec:distillation_formalism}{{3.1}{8}{}{section.3.1}{}}
+\newlabel{eq:xentropy}{{3.1}{8}{}{equation.3.1}{}}
+\newlabel{eq:forward_kl}{{3.2}{8}{}{equation.3.2}{}}
+\newlabel{eq:reverse_kl}{{3.3}{8}{}{equation.3.3}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3.1}{\ignorespaces Image from \cite  {guMiniLLMOnPolicyDistillation2026} showing the difference of using forward and reverse KL to fit a mixture of three Gaussians. The reverse KL tries to fit the major mode while the forward KL tries to approximate the three modes.}}{9}{}\protected@file@percent }
+\newlabel{fig:toy_forward_vs_reverse}{{3.1}{9}{}{figure.3.1}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3.2}{\ignorespaces Off-policy distillation generates completions from the teacher and trains the student on them. On-policy distillation generates completions from the student and scores them with both models.}}{9}{}\protected@file@percent }
+\newlabel{fig:off_vs_on_policy}{{3.2}{9}{}{figure.3.2}{}}
+\newlabel{eq:on_policy_distillation}{{3.4}{9}{}{equation.3.4}{}}
+\newlabel{eq:sampled_token_reverse_kl}{{3.5}{9}{}{equation.3.5}{}}
+\citation{shenfeldSelfDistillationEnablesContinual2026}
+\citation{hubotterReinforcementLearningSelfDistillation2026}
+\citation{penalozaPrivilegedInformationDistillation2026}
+\citation{zhaoSelfDistilledReasonerOnPolicy2026}
+\newlabel{eq:sampled_token_forward_kl}{{3.6}{10}{}{equation.3.6}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {3.2}Privileged Context}{10}{}\protected@file@percent }
+\newlabel{sec: methods_pc}{{3.2}{10}{}{section.3.2}{}}
+\newlabel{eq:privileged_context_reverse_kl}{{3.9}{10}{}{equation.3.9}{}}
+\newlabel{eq:privileged_context_distillation}{{3.10}{10}{}{equation.3.10}{}}
+\newlabel{eq:privileged_context_sampled_reverse_kl}{{3.11}{11}{}{equation.3.11}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {3.3}Context Distillation}{11}{}\protected@file@percent }
+\newlabel{sec: methods_cd}{{3.3}{11}{}{section.3.3}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {3.4}Top-K KL}{12}{}\protected@file@percent }
+\newlabel{sec: top-k_kl}{{3.4}{12}{}{section.3.4}{}}
+\newlabel{eq:topk_sets}{{3.15}{12}{}{equation.3.15}{}}
+\newlabel{eq:tail_bucket_distribution}{{3.16}{12}{}{equation.3.16}{}}
+\newlabel{eq:topk_forward_kl}{{3.17}{12}{}{equation.3.17}{}}
+\newlabel{eq:topk_reverse_kl}{{3.18}{12}{}{equation.3.18}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3.3}{\ignorespaces Top-$K$ approximation of the forward and reverse KL. Instead of summing over the full vocabulary $V$, the $K$ tokens with the highest teacher (forward) or student (reverse) probability are retained explicitly and the remaining vocabulary is grouped into a tail bucket.}}{13}{}\protected@file@percent }
+\newlabel{fig:topk_forward_vs_reverse_kl}{{3.3}{13}{}{figure.3.3}{}}
+\newlabel{eq:teacher_support_reverse_kl}{{3.19}{13}{}{equation.3.19}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {3.5}Metrics}{13}{}\protected@file@percent }
+\newlabel{sec:metrics}{{3.5}{13}{}{section.3.5}{}}
+\newlabel{eq:topk_support_coverage}{{3.20}{13}{}{equation.3.20}{}}
+\citation{liRethinkingOnPolicyDistillation2026}
+\citation{he2025DeepMath103KLargeScaleChallenging}
+\citation{penedo2024datatrove}
+\citation{yangQwen3TechnicalReport2025}
+\citation{liRethinkingOnPolicyDistillation2026}
+\citation{yangQwen3TechnicalReport2025}
+\citation{wuLightningOPDEfficient2026}
+\citation{kwon2023efficient}
+\@writefile{toc}{\contentsline {chapter}{\numberline {4}Experimental Setup}{15}{}\protected@file@percent }
+\@writefile{lof}{\addvspace {10\p@ }}
+\@writefile{lot}{\addvspace {10\p@ }}
+\@writefile{toc}{\contentsline {section}{\numberline {4.1}Data}{15}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {4.2}Models}{15}{}\protected@file@percent }
+\citation{aime25}
+\citation{reinGPQAGraduateLevelGoogleProof2023}
+\citation{zhou2023instructionfollowingevaluationlargelanguage}
+\citation{UK_AI_Security_Institute_Inspect_AI_Framework_2024}
+\citation{patino2026_distilling_100b_models_40x_faster_with_trl}
+\citation{wolf-etal-2020-transformers}
+\@writefile{toc}{\contentsline {section}{\numberline {4.3}Inference Engine and Computational Resources}{16}{}\protected@file@percent }
+\newlabel{sec: inference_engine}{{4.3}{16}{}{section.4.3}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {4.4}Benchmarks}{16}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {4.5}Implementation}{16}{}\protected@file@percent }
+\newlabel{sec: implementation}{{4.5}{16}{}{section.4.5}{}}
+\citation{vonwerra2020trl}
+\citation{patino2026_distilling_100b_models_40x_faster_with_trl}
+\@writefile{toc}{\contentsline {chapter}{\numberline {5}Experiments}{18}{}\protected@file@percent }
+\@writefile{lof}{\addvspace {10\p@ }}
+\@writefile{lot}{\addvspace {10\p@ }}
+\@writefile{toc}{\contentsline {section}{\numberline {5.1}OPD with Privileged Context}{18}{}\protected@file@percent }
+\newlabel{sec: exp_opd_and_pc}{{5.1}{18}{}{section.5.1}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5.1}{\ignorespaces Example showing the difference between $\pi _\theta (\cdot \mid x, y_{<n})$ (Student Scoring Context) and $\pi _T(\cdot \mid x, c, y_{<n})$ (Teacher Scoring Context). The privileged context is \emph  {You are a 235B teacher and your logits are being used to train a 4B model}. We add it to the user turn seen by the teacher when generating the logits, and it is the only difference between the text scored by the student and teacher policies.}}{19}{}\protected@file@percent }
+\newlabel{fig: pc_example}{{5.1}{19}{}{figure.5.1}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5.2}{\ignorespaces AIME scores comparing an off-policy distillation method (SFT) with OPD distillation methods. The plots show that using OPD results in better performance for both students regardless of teacher size. The effect of teacher scaling is easier to interpret through the gap recovery rate in Figure~\ref {fig: aime_gap_scaling}.}}{19}{}\protected@file@percent }
+\newlabel{fig: aime_score_scaling}{{5.2}{19}{}{figure.5.2}{}}
+\citation{yeOnPolicyContextDistillation2026}
+\citation{sang2026CRISPCompressedReasoning}
+\@writefile{lof}{\contentsline {figure}{\numberline {5.3}{\ignorespaces Gap recovery rate for all student-teacher combinations. The performance of the 0.6B student degrades as we increase the teacher size, and the decline is most pronounced for SFT, followed by OPD with privileged context. For the 4B student, privileged context also causes the steepest decline when scaling the teacher, but still performs better than SFT.}}{20}{}\protected@file@percent }
+\newlabel{fig: aime_gap_scaling}{{5.3}{20}{}{figure.5.3}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {5.2}Context Distillation vs. Direct System Prompt}{20}{}\protected@file@percent }
+\newlabel{sec: exps_system_prompt}{{5.2}{20}{}{section.5.2}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {5.1}{\ignorespaces Share of incorrect attempts (\% of incorrect) per error category in AIME25.}}{21}{}\protected@file@percent }
+\newlabel{tab:aime-error-breakdown}{{5.1}{21}{}{table.5.1}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5.4}{\ignorespaces Comparison between providing the targeted intervention as privileged context or through a system prompt. The key difference is that the privileged context is only seen by the teacher while the system prompt is seen by the teacher and the student.}}{21}{}\protected@file@percent }
+\newlabel{fig: pc_vs_system_prompt_example}{{5.4}{21}{}{figure.5.4}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {5.3}Rollout Lengths and Epistemic Words}{21}{}\protected@file@percent }
+\newlabel{sec: exps_rollout_lengths}{{5.3}{21}{}{section.5.3}{}}
+\citation{kimWhyDoesSelfDistillation2026}
+\@writefile{lof}{\contentsline {figure}{\numberline {5.5}{\ignorespaces Plot comparing the performance of a privileged context with passing the same information through the system prompt to encourage brevity in the model response. The plots show that using the system prompt instead of the privileged information is more effective in terms of AIME performance.}}{22}{}\protected@file@percent }
+\newlabel{fig: pc_vs_system_prompt}{{5.5}{22}{}{figure.5.5}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {5.2}{\ignorespaces Teacher rollout length statistics for the 4B, 30B, and 235B teachers.}}{22}{}\protected@file@percent }
+\newlabel{tab:teacher-rollout-lengths}{{5.2}{22}{}{table.5.2}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5.6}{\ignorespaces Plots showing how the mean response length increases for both students after OPD. The figure also shows that scaling the teacher size causes the rollout length to increase, and that this scaling is more pronounced for the 0.6B student.}}{23}{}\protected@file@percent }
+\newlabel{fig: rollout_length}{{5.6}{23}{}{figure.5.6}{}}
+\citation{mirzadehImprovedKnowledgeDistillation2019}
+\citation{shenfeldSelfDistillationEnablesContinual2026}
+\citation{hubotterReinforcementLearningSelfDistillation2026}
+\citation{patino2026_distilling_100b_models_40x_faster_with_trl}
+\@writefile{lof}{\contentsline {figure}{\numberline {5.7}{\ignorespaces Number of epistemic words per rollout for different types of OPD setups. The plots show that all methods increase the number of epistemic words per rollout for all teacher sizes, but that the behavior does not scale with teacher size when we instruct the student model to be succinct in its answers.}}{24}{}\protected@file@percent }
+\newlabel{fig: epistemic_words}{{5.7}{24}{}{figure.5.7}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {5.4}Using Privileged Context for Teacher-Assisted Distillation}{24}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {5.5}Extending from top-1 to top-$K$ Log Probabilities}{24}{}\protected@file@percent }
+\newlabel{sec: exps_top_k}{{5.5}{24}{}{section.5.5}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5.8}{\ignorespaces Effect of increasing the top-$K$ log probabilities. The 0.6B student benefits from increasing $K$ for the smallest teacher, but its performance degrades when using more log probabilities from the 235B teacher. These results suggest that the 0.6B student cannot capture the increasing complexity of the large teacher but benefits from more detailed feedback from a teacher within its reach. For the 4B student, scaling $K$ does not have a positive impact since its performance remains constant or decreases for all teachers.}}{25}{}\protected@file@percent }
+\newlabel{fig: top-k_effect}{{5.8}{25}{}{figure.5.8}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {5.3}{\ignorespaces Probability mass coverage for different top-$K$ values and student-teacher combinations. The 4B/4B setting was not evaluated.}}{25}{}\protected@file@percent }
+\newlabel{tab:top-k-coverage}{{5.3}{25}{}{table.5.3}{}}
+\@writefile{toc}{\contentsline {chapter}{\numberline {6}Conclusions}{26}{}\protected@file@percent }
+\@writefile{lof}{\addvspace {10\p@ }}
+\@writefile{lot}{\addvspace {10\p@ }}
+\@writefile{toc}{\contentsline {chapter}{\numberline {A}Appendix}{28}{}\protected@file@percent }
+\@writefile{lof}{\addvspace {10\p@ }}
+\@writefile{lot}{\addvspace {10\p@ }}
+\@writefile{toc}{\contentsline {section}{\numberline {A.1}OPD vs Off-Policy Methods}{28}{}\protected@file@percent }
+\newlabel{sec: exps_off_vs_on}{{A.1}{28}{}{section.1.1}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {A.1}{\ignorespaces Effect of increasing the top-k log probabilities. The 0.6B benefits from increasing K for the smallest teacher, but its performance degrades when using more logprobs from the 235B teacher. These results suggest that the 0.6B student cannot capture the increasing complexity of the large teacher but benefits from more details from a teacher within its reach. For the 4B student, scaling K does not have a positive impact since its performance remains constant or decreases for all teachers.}}{29}{}\protected@file@percent }
+\newlabel{fig: opd_vs_off-policy}{{A.1}{29}{}{figure.1.1}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {A.2}Catastrophic Forgetting}{29}{}\protected@file@percent }
+\newlabel{sec: exps_forgetting}{{A.2}{29}{}{section.1.2}{}}
+\bibstyle{plain}
+\bibdata{bibentries}
+\@writefile{lof}{\contentsline {figure}{\numberline {A.2}{\ignorespaces Scores for GPQA for all students while training targeting math reasoning skills. The plots show how the 0.6B student suffers from catastrophic forgetting for the three methods, but also how SFT is the method that degrades performance the most. For the 4B student, all methods preserve the GPQA performance and even marginally improve it. These results show how the main driver in catastrophic forgetting is model capacity, and that on-policy methods are better to mitigate performance degradation.}}{30}{}\protected@file@percent }
+\newlabel{fig: gpqa_forgetting}{{A.2}{30}{}{figure.1.2}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {A.3}TAID Results}{30}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {A.4}Hyperparameters}{30}{}\protected@file@percent }
+\newlabel{app: hyperparameters}{{A.4}{30}{}{section.1.4}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {A.5}Training across Families}{30}{}\protected@file@percent }
+\newlabel{app: different_model_family}{{A.5}{30}{}{section.1.5}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {A.6}Privileged Information Prompts}{30}{}\protected@file@percent }
+\newlabel{app: pc_prompts}{{A.6}{30}{}{section.1.6}{}}
+\bibcite{agarwalOnPolicyDistillationLanguage2024}{1}
+\bibcite{UK_AI_Security_Institute_Inspect_AI_Framework_2024}{2}
+\bibcite{armandpourUnmaskingOnPolicyDistillation2026}{3}
+\bibcite{askell2021GeneralLanguageAssistant}{4}
+\bibcite{bhargava2024PromptBaking}{5}
+\bibcite{boizardCrossTokenizerDistillationUniversal2025}{6}
+\bibcite{chenRetainingDoingRole2025}{7}
+\bibcite{deepseekai2026deepseekv4}{8}
+\bibcite{guMiniLLMOnPolicyDistillation2026}{9}
+\bibcite{heSelfDistillationZeroSelfRevision2026}{10}
+\bibcite{he2025DeepMath103KLargeScaleChallenging}{11}
+\bibcite{hintonDistillingKnowledgeNeural2015}{12}
+\bibcite{huang2025SelecTKDSelectiveTokenWeighted}{13}
+\bibcite{hubotterReinforcementLearningSelfDistillation2026}{14}
+\bibcite{jang2026StableOnPolicyDistillation}{15}
+\bibcite{kimWhyDoesSelfDistillation2026}{16}
+\bibcite{kwon2023efficient}{17}
+\bibcite{liRethinkingOnPolicyDistillation2026}{18}
+\bibcite{liSmallModelsStruggle2025}{19}
+\bibcite{luOnPolicyDistillation2025}{20}
+\bibcite{minixhoferUniversalCrossTokenizerDistillation2025}{21}
+\bibcite{mirzadehImprovedKnowledgeDistillation2019}{22}
+\bibcite{padmanabhan2023PropagatingKnowledgeUpdates}{23}
+\bibcite{patino2026_distilling_100b_models_40x_faster_with_trl}{24}
+\bibcite{penalozaPrivilegedInformationDistillation2026}{25}
+\bibcite{penedo2024datatrove}{26}
+\bibcite{zotero-item-425}{27}
+\bibcite{reinGPQAGraduateLevelGoogleProof2023}{28}
+\bibcite{pmlr-v9-ross10a}{29}
+\bibcite{sang2026CRISPCompressedReasoning}{30}
+\bibcite{shenfeldSelfDistillationEnablesContinual2026}{31}
+\bibcite{shi2021FollowYourPath}{32}
+\bibcite{shin2025GenerativePromptInternalization}{33}
+\bibcite{shingTAIDTemporallyAdaptive2025}{34}
+\bibcite{snell2022LearningDistillingContext}{35}
+\bibcite{tan2023GKDGeneralKnowledge}{36}
+\bibcite{team2026KimiK2Open}{37}
+\bibcite{vonwerra2020trl}{38}
+\bibcite{wang2021ERNIE30Titan}{39}
+\bibcite{wolf-etal-2020-transformers}{40}
+\bibcite{wuLightningOPDEfficient2026}{41}
+\bibcite{xu2024SpeculativeKnowledgeDistillation}{42}
+\bibcite{yanDistributionAlignedSequenceDistillation2026}{43}
+\bibcite{yangQwen3TechnicalReport2025}{44}
+\bibcite{yangSelfDistilledRLVR2026}{45}
+\bibcite{yangSelfDistilledRLVR2026a}{46}
+\bibcite{yeOnPolicyContextDistillation2026}{47}
+\bibcite{zhangLiftingCurseCapacity2023}{48}
+\bibcite{aime25}{49}
+\bibcite{zhaoSelfDistilledReasonerOnPolicy2026}{50}
+\bibcite{zhou2023instructionfollowingevaluationlargelanguage}{51}
+\csgdef{tcb@ehg@height@pcsimplectx}{210.70009pt}
+\csgdef{tcb@ehg@height@pcsystemctx}{182.61682pt}
+\gdef \@abspage@last{38}
