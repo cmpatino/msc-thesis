@@ -25,7 +25,7 @@ Finally, studying this regime requires addressing systems challenges that do not
 To summarize, our contributions are:
 
 \begin{itemize}
-    \item Showing that OPD outperforms off-policy SFT across extreme capacity gaps, but that larger teachers do not reliably produce better students or higher gap recovery (Sections \ref{sec: exp_opd_and_pc} and \ref{sec: exps_off_vs_on}).
+    \item Showing that OPD outperforms off-policy distillation across extreme capacity gaps, but that larger teachers do not reliably produce better students or higher gap recovery (Sections \ref{sec: exp_opd_and_pc} and \ref{sec: exps_off_vs_on}).
     \item Showing that privileged context is not a general solution to the capacity gap: simple teacher-only context can degrade performance, and targeted context distillation is less effective than directly conditioning the student with a system prompt (Section \ref{sec: exps_system_prompt}).
     \item Identifying truncation and excessive rollout length as central failure modes when small students learn from larger teachers, and showing that rollout-length growth is not explained solely by increased epistemic wording (Sections \ref{sec: exps_system_prompt} and \ref{sec: exps_rollout_lengths}).
     \item Showing that increasing from top-1 to top-$K$ teacher log probabilities improves probability mass coverage but can worsen student performance under large capacity gaps (Section \ref{sec: exps_top_k}).
