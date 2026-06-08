@@ -339,26 +339,24 @@ This behavior presents another symptom of the capacity gap and shows how a small
     \label{fig: top-k_effect}
 \end{figure}
 
-\section{Catastrophic Forgetting and OOD Reasoning}
+\section{Catastrophic Forgetting and OOD Reasoning} \label{sec: exps_catastrophic_ood}
 
-Throughout the experiments in the previous sections, we targeted improving the math reasoning skills of the students. The main metric for that purpose was AIME25, but we also tracked GPQA-Diamond and IFEval to check how distillation impacted a related reasoning benchmark like GPQA and a non-reasoning one like IFEval.
+Throughout the experiments in the previous sections, we targeted the mathematical reasoning skills of the students. AIME25 was the main metric for that purpose, but we also tracked GPQA-Diamond and IFEval to measure whether distillation affected out-of-distribution reasoning and instruction following. This is important because improvements on the target domain can come at the cost of broader capabilities, especially when the student is much smaller than the teacher.
 
-We show in Figure \ref{fig: gpqa_reasoning} how the GPQA scores change for the different combinations of student and teacher. There is a notable difference between the 0.6B and the 4B. The former has a decline in performance as we scale the teacher while the latter either maintains or slightly increases performance. This difference in behavior points to the capacity of each student and how new knowlegde, in our case mathematical reasoning, displaces existing knowledge in the 0.6B student. In the 4B case, the model has enough capacity to retain science reasoning capabilities. 
+Figure~\ref{fig: gpqa_reasoning} shows how GPQA-Diamond changes across student--teacher combinations. The 0.6B and 4B students behave differently. For the 0.6B student, GPQA performance declines as we increase the teacher size, which suggests that specializing the model for mathematical reasoning displaces some of its existing scientific reasoning capability. For the 4B student, performance is stable or slightly improves, indicating that the larger student has enough capacity to absorb the math-focused feedback while retaining more of its out-of-distribution reasoning behavior.
 
-Despite this increase in the GPQA scores, the 4B student model does not reach the level of performance as the same model with reasoning enabled. This also aligns with the results we show in Figure \ref{fig: aime_with_reasoning}, where we compare the performance of the student in reasoning mode with the performance of the student after distillation. For the 4B student, the model improves around 25 points in all cases for AIME but it does not reach the score of the same model on reasoning mode. However, we do reach the same level of performance of the 0.6B model on reasoning mode. 
+However, retaining GPQA performance does not mean that distillation recovers the full reasoning-mode capability of the base model. Figure~\ref{fig: aime_with_reasoning} compares the distilled students against their base and reasoning-mode references on AIME25. For the 4B student, distillation improves AIME25 by roughly 25 percentage points across the evaluated settings, but the student remains below the same model with reasoning enabled. For the 0.6B student, the distilled model reaches roughly the same AIME25 performance as its reasoning-mode reference. Taken together, these results show that OPD can recover target-domain reasoning behavior in smaller students, but the smallest student is also more vulnerable to out-of-distribution degradation when the teacher becomes too large.
 
 \begin{figure}
     \centering
     \includegraphics[width=0.9\linewidth]{figures/pc_vs_system_gpqa.png}
-    \caption{Caption}
+    \caption{GPQA-Diamond pass@1 after distillation across student--teacher combinations. The 0.6B student loses out-of-distribution scientific reasoning performance as the teacher size increases, while the 4B student remains stable or slightly improves. The dotted line shows the reasoning-mode reference and the dashed line shows the base model before distillation.}
     \label{fig: gpqa_reasoning}
 \end{figure}
 
 \begin{figure}
     \centering
     \includegraphics[width=0.9\linewidth]{figures/pc_vs_system_aime_reasoning.png}
-    \caption{Caption}
+    \caption{AIME25 pass@1 after distillation compared with the base and reasoning-mode references. Distillation substantially improves both students over step 0; the 0.6B student reaches roughly its reasoning-mode performance, while the 4B student improves strongly but remains below its reasoning-mode reference.}
     \label{fig: aime_with_reasoning}
 \end{figure}
-
-
