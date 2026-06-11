@@ -3,13 +3,11 @@
 \section{Data}
 
 All training runs use prompts from DeepMath-103K \cite{he2025DeepMath103KLargeScaleChallenging}, a large-scale mathematical reasoning dataset available on Hugging Face\footnote{https://huggingface.co/datasets/zwhe99/DeepMath-103K}. This dataset is well matched to our target setting because it contains difficult, verifiable mathematics problems rather than general instruction-following prompts. The problems span a broad range of mathematical topics and were designed to be challenging and decontaminated from common evaluation benchmarks. We use the prompts as the common input distribution across all methods so that differences between runs can be attributed to the distillation objective and teacher choice rather than to differences in task selection.
-
 For off-policy experiments that require precomputed teacher data rollouts, we generate the teacher completions with DataTrove \cite{penedo2024datatrove} using the hyperparameters described in Appendix~\ref{app: hyperparameters}. We make the generated datasets available on Hugging Face.
 
 \section{Models}
 
 We use the Qwen3 model family \cite{yangQwen3TechnicalReport2025} to study different levels of the capacity gap. Keeping teacher and student within the same model family is important because architecture, tokenizer, training data, and chat-template differences can introduce stylistic and distributional mismatches that are unrelated to model size. Those mismatches can degrade distillation performance and obscure the specific effect of the teacher--student capacity gap \cite{liRethinkingOnPolicyDistillation2026}. Crucially, \cite{yangQwen3TechnicalReport2025} report that the small models go through a distillation process from larger models in the Qwen3 family. This prior distillation makes it even more important to be consistent with the model family from the teacher previously used for distillation \cite{wuLightningOPDEfficient2026}. We include preliminary experiments with different model families in Appendix~\ref{app: different_model_family}, but the main experiments focus on Qwen3.
-
 Specifically, we use Qwen3-0.6B and Qwen3-4B in non-thinking mode as students, and Qwen3-4B-Instruct, Qwen3-30B-A3B-Instruct-2507, and Qwen3-235B-A22B-Instruct-2507 as teachers. For the initial student models, we modify only the chat template, not the weights, to force non-thinking mode. This ensures that the student remains in the intended inference mode throughout training and preserves the baseline behavior reported by the Qwen team.
 
 \section{Inference Engine and Computational Resources} \label{sec: inference_engine}

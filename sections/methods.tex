@@ -1,5 +1,7 @@
 \chapter{Methods}
 
+\cs{A short intro to guide the reader and explain what is coming in this chapter would be helpful. Maybe also mention what is new?}
+
 \section{Distillation Formalism} \label{sec:distillation_formalism}
 
 Following the notation of on-policy generalized knowledge distillation \cite{agarwalOnPolicyDistillationLanguage2024}, let $x$ denote a prompt, let $V$ denote the vocabulary, and let $y = (y_1, y_2, \ldots, y_{L_y})$ denote an output sequence. The prefix before token $y_n$ is $y_{<n} = (y_1, \ldots, y_{n-1})$. We write the student policy as $\pi_\theta(\cdot \mid x, y_{<n})$ and the teacher policy as $\pi_T(\cdot \mid x, y_{<n})$, both of which define next-token distributions over $V$.
@@ -27,9 +29,9 @@ D_{\mathrm{KL}}(\pi_T \| \pi_\theta)(y \mid x)
 {\pi_\theta(v \mid x, y_{<n})}.
 \label{eq:forward_kl}
 \end{equation}
-
+%
 The reverse KL swaps the order of the two distributions:
-
+%
 \begin{equation}
 D_{\mathrm{KL}}(\pi_\theta \| \pi_T)(y \mid x)
 = \sum_{n=1}^{L_y} \sum_{v \in V}
@@ -39,7 +41,7 @@ D_{\mathrm{KL}}(\pi_\theta \| \pi_T)(y \mid x)
 {\pi_T(v \mid x, y_{<n})}.
 \label{eq:reverse_kl}
 \end{equation}
-
+%
 The distinction is important because KL divergence is asymmetric. Forward KL (FKL) averages the log-ratio under the teacher distribution, so it penalizes the student for failing to place probability mass on tokens the teacher considers likely. This makes it a mass-covering objective. Reverse KL (RKL) averages under the student distribution, so it penalizes tokens the student samples when the teacher assigns them low probability. This makes it more mode-seeking and can be useful when a lower-capacity student cannot match the full teacher distribution.
 
 We show the distinction graphically in Figure~\ref{fig:toy_forward_vs_reverse} using a plot from \cite{guMiniLLMOnPolicyDistillation2026} that shows how the forward and reverse KL fit a Gaussian mixture distribution with a single Gaussian distribution. The reverse KL seeks the major mode of the mixture while the forward KL tries to fit all three.
@@ -71,7 +73,7 @@ D(\pi_T, \pi_\theta)(y \mid x)
 \right],
 \label{eq:on_policy_distillation}
 \end{equation}
-
+%
 where $D$ can be instantiated as the forward KL in Equation~\ref{eq:forward_kl}, the reverse KL in Equation~\ref{eq:reverse_kl}, or another token-level divergence. We can define off-policy distillation analogously by changing $y \sim \pi_\theta(\cdot \mid x)$ for $y \sim \pi_T(\cdot \mid x)$.
 
 In practice, computing the full sums over $V$ can be expensive. A common solution is to only use one log-probability instead of the distribution over the full vocabulary. The sampled-token reverse-KL formulation used in on-policy distillation keeps only the realized token at each position of a student rollout $\hat{y} \sim \pi_\theta(\cdot \mid x)$. The resulting top-1 sampled-token estimate is
@@ -86,10 +88,10 @@ In practice, computing the full sums over $V$ can be expensive. A common solutio
 \right].
 \label{eq:sampled_token_reverse_kl}
 \end{equation}
-
+%
 This is the sampled-token analogue of Equation~\ref{eq:reverse_kl}. Rather than matching the full next-token distributions, it scores the token actually produced by the student under both policies.
 
-We can write an analogous formulation for the Equation~\ref{eq:forward_kl}, where we only use the realized token at each position of a teacher rollout $\hat{y} \sim \pi_T(\cdot \mid x)$. Additionally, we use the forward instead of the reverse KL to avoid optimizing a biased surrogate or using importance sampling to correct the off-policy nature of the data.
+We can write an analogous formulation for Equation~\ref{eq:forward_kl}, where we only use the realized token at each position of a teacher rollout $\hat{y} \sim \pi_T(\cdot \mid x)$. Additionally, we use the forward instead of the reverse KL to avoid optimizing a biased surrogate or using importance sampling to correct the off-policy nature of the data.
 
 \begin{equation}
 \widehat{D}_{\mathrm{KL}}^{\mathrm{top}\mbox{-}1}
@@ -101,7 +103,7 @@ We can write an analogous formulation for the Equation~\ref{eq:forward_kl}, wher
 \right].
 \label{eq:sampled_token_forward_kl}
 \end{equation}
-
+%
 The formulation in Equation~\ref{eq:sampled_token_forward_kl} is equivalent to the soft version of SFT, because we are including the log probability of the token sampled by the teacher instead of excluding it and using it as a hard target as in Equation~\ref{eq:xentropy}.
 
 Regardless of the loss function we choose, we can specify what the teacher and student see during training to change the behavior of the trained student.
@@ -113,17 +115,17 @@ Privileged context is additional information that is available to the teacher du
 \begin{equation}
 \pi_\theta(\cdot \mid x, y_{<n}),
 \end{equation}
-
+%
 while the privileged teacher policy is evaluated as
-
+%
 \begin{equation}
 \pi_T(\cdot \mid x, c, y_{<n}).
 \end{equation}
-
+%
 The goal is therefore not to teach the student to depend on $c$, but to use $c$ to construct a more informative teacher signal during training. At inference time, the student still acts according to $\pi_\theta(\cdot \mid x, y_{<n})$.
 
 We can express privileged-context distillation by replacing the teacher distribution in the KL objective with the context-conditioned teacher. For an on-policy rollout $\hat{y} \sim \pi_\theta(\cdot \mid x)$, the reverse-KL form becomes
-
+%
 \begin{equation}
 D_{\mathrm{KL}}(\pi_\theta \| \pi_T^c)(\hat{y} \mid x, c)
 = \sum_{n=1}^{L_{\hat{y}}} \sum_{v \in V}
@@ -133,9 +135,9 @@ D_{\mathrm{KL}}(\pi_\theta \| \pi_T^c)(\hat{y} \mid x, c)
 {\pi_T(v \mid x, c, \hat{y}_{<n})},
 \label{eq:privileged_context_reverse_kl}
 \end{equation}
-
+%
 where $\pi_T^c$ denotes the teacher distribution conditioned on the privileged context $c$. The corresponding training objective is
-
+%
 \begin{equation}
 \mathcal{L}_{\mathrm{PCD}}(\theta)
 =
@@ -148,11 +150,11 @@ D_{\mathrm{KL}}(\pi_\theta \| \pi_T^c)(\hat{y} \mid x, c)
 \right],
 \label{eq:privileged_context_distillation}
 \end{equation}
-
+%
 where $\mathcal{D}_{\mathrm{PI}}$ is a dataset of prompts paired with privileged context. This objective keeps the rollout distribution on-policy with respect to the student, but computes the teacher probabilities using the stronger context $(x,c)$. In the self-distillation case, the teacher and student can share parameters and differ only in their input context. In our more general notation and in this thesis, $\pi_T$ is a separate teacher model. The defining property of privileged context is that only the teacher receives $c$.
 
 As in Equation~\ref{eq:sampled_token_reverse_kl}, a top-1 sampled-token approximation keeps only the token actually produced by the student:
-
+%
 \begin{equation}
 \widehat{D}_{\mathrm{KL}}^{\mathrm{top}\mbox{-}1}
 (\pi_\theta \| \pi_T^c)(\hat{y} \mid x, c)
@@ -163,7 +165,7 @@ As in Equation~\ref{eq:sampled_token_reverse_kl}, a top-1 sampled-token approxim
 \right].
 \label{eq:privileged_context_sampled_reverse_kl}
 \end{equation}
-
+%
 This formulation makes the role of privileged context explicit. The sampled token and student probability are computed without access to $c$, while the teacher probability is computed with access to $c$. The loss therefore transfers the behavior induced by the privileged context into a student policy that must operate without it.
 
 \section{Context Distillation} \label{sec: methods_cd}
@@ -175,7 +177,7 @@ In off-policy distillation, the rollouts are generated before training by the te
 \begin{equation}
 \hat{y}^c \sim \pi_T(\cdot \mid x,c),
 \end{equation}
-
+%
 and the student is trained to imitate this fixed completion. This is the same mechanism as SFT on teacher-generated traces in Equation~\ref{eq:xentropy}, except that the traces come from the context-conditioned teacher. If teacher log-probabilities are also stored, the sampled-token forward-KL form from Equation~\ref{eq:sampled_token_forward_kl} can be used instead. In either case, off-policy context distillation transfers $c$ only through the teacher rollout and the student learns to mimic outputs that were generated under the instruction in $c$.
 
 On-policy distillation has two distinct ways to introduce the same context. The first is the privileged-context setting from Section~\ref{sec: methods_pc}. The student generates an ordinary on-policy rollout
@@ -183,9 +185,9 @@ On-policy distillation has two distinct ways to introduce the same context. The 
 \begin{equation}
 \hat{y} \sim \pi_\theta(\cdot \mid x),
 \end{equation}
-
+%
 but the teacher scores each prefix with access to $c$. Using the top-1 reverse-KL approximation, this corresponds to the privileged-context objective in Equation~\ref{eq:privileged_context_sampled_reverse_kl}.
-
+%
 Here $c$ is distilled through the teacher probabilities. The student never observes the context directly, but it is updated toward token choices that the teacher prefers when the teacher is conditioned on $c$.
 
 The second on-policy mechanism is to give the context directly to the student during rollout generation. In this case the rollout distribution itself becomes context-conditioned:
@@ -193,7 +195,7 @@ The second on-policy mechanism is to give the context directly to the student du
 \begin{equation}
 \hat{y}^c \sim \pi_\theta(\cdot \mid x,c).
 \end{equation}
-
+%
 The same on-policy divergence from Equation~\ref{eq:on_policy_distillation} can then be applied to the tokens produced by this context-aware student, with the teacher evaluated on the same context-conditioned prefixes. In this variant, $c$ changes the states visited during training because the student generates its own rollouts while aware of the context. This differs from privileged-context distillation, where the rollout distribution is still $\pi_\theta(\cdot \mid x)$ and only the teacher scores with $c$. Both on-policy variants can produce a trained student whose behavior reflects the instruction in $c$ without incorporating the instruction explicitly during inference.
 
 \section{Top-K KL} \label{sec: top-k_kl}
@@ -201,7 +203,6 @@ The same on-policy divergence from Equation~\ref{eq:on_policy_distillation} can 
 The KL objectives in Equations~\ref{eq:forward_kl} and~\ref{eq:reverse_kl} require summing over the full vocabulary at every token position. This is expensive for large language models, because the vocabulary can contain hundreds of thousands of tokens. The other end of the spectrum is only using the one log-probability as shown in Equations~\ref{eq:sampled_token_reverse_kl} and \ref{eq:sampled_token_forward_kl}. A practical approximation that balances these approaches is to keep the $k$ tokens with the largest log-probabilities under one of the two policies. However, we do not renormalize the retained log-probabilities over only those $k$ tokens. Renormalization would discard how much probability mass the model assigns to the rest of the vocabulary. Instead, we group all tokens outside the selected top-$k$ set into a single tail bucket.
 
 For compactness, write $h_n = (x, y_{<n})$. For each prefix, define the teacher and student top-$k$ sets as
-
 
 \begin{equation}
 S_{T,n}^{k}
@@ -211,9 +212,9 @@ S_{\theta,n}^{k}
 = \mathrm{TopK}_{k}\left(\pi_\theta(\cdot \mid h_n)\right).
 \label{eq:topk_sets}
 \end{equation}
-
+%
 Given a distribution $q$ and a selected token set $S$, let $\tau_S$ denote the tail bucket containing all tokens in $V \setminus S$. This induces a coarsened distribution $q^{[S]}$ over $S \cup \{\tau_S\}$:
-
+%
 \begin{equation}
 q^{[S]}(b \mid h_n)
 =
@@ -225,7 +226,7 @@ q(b \mid h_n), & b \in S, \\
 \right.
 \label{eq:tail_bucket_distribution}
 \end{equation}
-
+%
 This construction preserves a coarse notion of the tail probability that is ignored by the top-$k$ token list. For example, with $k=10$, the first ten buckets are the ten selected tokens and the eleventh bucket is the total probability mass assigned to every other token. This has three benefits over renormalizing the selected tokens. First, it keeps the top-$k$ probabilities on their original scale, so a model that assigns $90\%$ probability mass to the selected tokens is not treated the same as a model that assigns only $40\%$ mass to them. Second, it allows the loss to penalize disagreements about how much probability should remain in the long tail, even though the individual tail tokens are not represented. Third, it avoids artificially inflating the selected tokens when the model is uncertain and spreads probability mass across many low-probability alternatives.
 
 The standard top-$k$ forward KL uses the teacher top-$k$ set, because the expectation in the forward KL is taken under the teacher distribution. Both the teacher and student are evaluated on the same teacher-induced buckets $S_{T,n}^{k} \cup \{\tau_{S_{T,n}^{k}}\}$:
@@ -242,7 +243,7 @@ The standard top-$k$ forward KL uses the teacher top-$k$ set, because the expect
 {\pi_\theta^{[S_{T,n}^{k}]}(b \mid h_n)}.
 \label{eq:topk_forward_kl}
 \end{equation}
-
+%
 Analogously, the standard top-$k$ reverse KL uses the student top-$k$ set, because the expectation in the reverse KL is taken under the student distribution. The teacher is evaluated on the same student-induced buckets $S_{\theta,n}^{k} \cup \{\tau_{S_{\theta,n}^{k}}\}$:
 
 \begin{equation}
@@ -279,7 +280,7 @@ For reasons explained in Section \ref{sec: inference_engine}, we also use a vari
 {\pi_T^{[S_{T,n}^{k}]}(b \mid h_n)}.
 \label{eq:teacher_support_reverse_kl}
 \end{equation}
-
+%
 TS-RKL is not the standard top-$k$ reverse KL in Equation~\ref{eq:topk_reverse_kl}, because the explicit token buckets are chosen by the teacher rather than the student. The objective is still reverse KL in direction: the log-ratio is $\log \pi_\theta - \log \pi_T$ and the expectation is over the student distribution on the teacher-induced buckets.
 
 \section{Metrics}
@@ -298,7 +299,7 @@ A teacher-support top-$k$ reverse-KL objective can only provide token-level supe
 \end{equation}
 This is the student probability mass that falls inside the teacher's top-$k$, averaged over prefixes. Its complement $1-\mathrm{Coverage}_{k}$ is the student mass lying outside the teacher's top-$k$, i.e. the fraction of the student's distribution that a teacher top-$k$ support cannot supervise at the token level.
 
-\textbf{Gap Recovery.}
+\noindent\textbf{Gap Recovery.}
 We are not only interested in the final performance of the student, but also in how much of the teacher performance the student recovers. Following \cite{liRethinkingOnPolicyDistillation2026}, we measure the recovered teacher-student gap as
 \begin{equation}
 \mathrm{GapRecovery}

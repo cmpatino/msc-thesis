@@ -1,5 +1,7 @@
 \chapter{Experiments}
 
+\cs{Maybe a short intro text to guide the reader through what is coming. Some expectation management so to say.}
+
 \section{OPD with Privileged Context} \label{sec: exp_opd_and_pc}
 
 \begin{figure}
@@ -135,6 +137,7 @@ As shown by Table~\ref{tab:aime-error-breakdown}, the predominant errors are tru
   \centering
   \caption{Share of incorrect attempts (\% of incorrect) per error category in AIME25.}
   \label{tab:aime-error-breakdown}
+  \scalebox{0.94}{
   \begin{tabular}{l r r r r r}
     \toprule
     Student / Teacher & Truncation & Wrong substantive & Off-by-small & Out of range & Format fail \\
@@ -146,6 +149,7 @@ As shown by Table~\ref{tab:aime-error-breakdown}, the predominant errors are tru
     0.6B / 235B   & \textbf{86\%} & 11\%          & 1\%  & 2\%  & 0\% \\
     \bottomrule
   \end{tabular}
+  }
 \end{table}
 
 To address the two main failure modes, we included the privileged context shown in Figure \ref{fig: pc_vs_system_prompt_example}, which encourages concise and direct mathematical reasoning. For the succinctness guideline, we use a portion of the prompt developed by \cite{sang2026CRISPCompressedReasoning}. We exclude the section that refers to the format expected by AIME to focus on general math reasoning skills instead of formatting issues specific to a benchmark.
@@ -305,6 +309,8 @@ One of the first works that addressed the capacity gap proposed progressively di
 
 We wanted to follow the same idea in the context of OPD and PC while avoiding multiple distillation runs. We set up the distillation with the 0.6B student and the 4B teacher, as this combination has a small capacity gap and performance comparable to other student-teacher combinations. Instead of incorporating instructions or information about the problem as in Figures \ref{fig: pc_example} and \ref{fig: pc_vs_system_prompt_example}, we include a rollout from the 30B or 235B teacher for that prompt in the 4B teacher's privileged context. The larger teacher's rollout is therefore visible only to the 4B teacher when it scores the student's tokens, while the 0.6B student still generates rollouts from its own context. That way, the 4B teacher effectively acts as a bridge between the larger teachers and the 0.6B student. We follow an approach similar to \cite{shenfeldSelfDistillationEnablesContinual2026}, where they incorporate demonstrations from GPT-4o to show the student how the problem can be solved.
 
+\cs{It seems the experiment is missing?}
+
 \section{Extending from top-1 to top-$K$ Log Probabilities} \label{sec: exps_top_k}
 
 Because PC and system-prompt interventions did not solve the capacity gap when scaling the teacher, we next explored results showing that increasing the number of log probabilities used for training can improve student performance in OPD settings \cite{hubotterReinforcementLearningSelfDistillation2026}. Scaling the number of log probabilities is expensive when using a separate server for the teacher, because we need to transfer the log probabilities from the server hosting the teacher to the GPUs hosting the student model \cite{patino2026_distilling_100b_models_40x_faster_with_trl}. For that reason, we restrict our analysis to $K \in \{1, 10, 50\}$.
@@ -313,7 +319,7 @@ We calculated the probability mass coverage, as defined in Section \ref{sec:metr
 
 \begin{table}[ht]
   \centering
-  \caption{Probability mass coverage for different top-$K$ values and student-teacher combinations. The 4B/4B setting was not evaluated.}
+  \caption{Probability mass coverage for different top-$K$ values and student-teacher combinations. The 4B/4B setting was not evaluated. \cs{So? What is conclusion?}}
   \label{tab:top-k-coverage}
   \begin{tabular}{l l r r r}
     \toprule
