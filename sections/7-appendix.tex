@@ -2,10 +2,14 @@
 
 \section{OPD vs Off-Policy Methods} \label{sec: exps_off_vs_on}
 
+We compare the three distillation methods that only use feedback from the sampled token at each position. OPD uses the token sampled by the student and scores it under both the student and teacher policies. The two off-policy methods instead use teacher-generated rollouts: SFT treats the sampled token as a hard target, while the soft target objective also includes the teacher log probability for that sampled token.
+
+The results in Figure~\ref{fig: opd_vs_off-policy} show that OPD is stronger than both off-policy methods across all evaluated student--teacher combinations. Among the off-policy methods, SFT consistently performs better than the soft target objective. The soft off-policy objective has worse absolute performance in every setting and also scales worse with teacher size: its gap recovery rate declines more sharply than SFT for both students. These results suggest that, when only the sampled token is available, adding the teacher's probability for a teacher-generated token is not enough to recover the benefit of training on the student's own rollout distribution.
+
 \begin{figure}
     \centering
     \includegraphics[width=0.9\linewidth]{figures/off_vs_on_policy.png}
-    \caption{Effect of increasing the top-k log probabilities. The 0.6B benefits from increasing K for the smallest teacher, but its performance degrades when using more logprobs from the 235B teacher. These results suggest that the 0.6B student cannot capture the increasing complexity of the large teacher but benefits from more details from a teacher within its reach. For the 4B student, scaling K does not have a positive impact since its performance remains constant or decreases for all teachers.}
+    \caption{Gap recovery rate for the three distillation methods that use only the sampled token at each position. OPD performs best for both students across teacher sizes. Among the off-policy methods, SFT is consistently stronger than the soft target objective, which has lower gap recovery in every setting and degrades more when scaling the teacher.}
     \label{fig: opd_vs_off-policy}
 \end{figure}
 
