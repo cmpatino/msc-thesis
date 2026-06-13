@@ -28,11 +28,95 @@
 
 \section{Hyperparameters} \label{app: hyperparameters}
 
+\begin{table}[htbp]
+    \centering
+    \small
+    \begin{tabular}{ll}
+        \toprule
+        Hyperparameter & Value \\
+        \midrule
+        \texttt{temperature} & \texttt{1.0} \\
+        \texttt{lmbda} & \texttt{1.0} \\
+        \texttt{beta} & \texttt{1.0} \\
+        \texttt{max\_completion\_length} & \texttt{4096} \\
+        \texttt{num\_generations} & \texttt{4} \\
+        \texttt{use\_vllm} & \texttt{true} \\
+        \texttt{vllm\_mode} & \texttt{colocate} \\
+        \texttt{vllm\_gpu\_memory\_utilization} & \texttt{0.2} \\
+        \texttt{bf16} & \texttt{true} \\
+        \texttt{gradient\_accumulation\_steps} & \texttt{64} \\
+        \texttt{max\_length} & \texttt{8192} \\
+        \texttt{per\_device\_train\_batch\_size} & \texttt{1} \\
+        \texttt{seed} & \texttt{42} \\
+        \texttt{num\_train\_epochs} & \texttt{1} \\
+        \texttt{learning\_rate} & \texttt{1e-6} \\
+        \texttt{lr\_scheduler\_type} & \texttt{constant\_with\_warmup} \\
+        \texttt{warmup\_steps} & \texttt{5} \\
+        \bottomrule
+    \end{tabular}
+    \caption{General hyperparameters used for distillation training. The effective batch size if of 2048 given our 4 nodes with 8 GPUs each. For details on these hyperameters you can refer to \protect\url{https://huggingface.co/docs/trl/distillation_trainer\#trl.experimental.distillation.DistillationConfig}}
+    \label{tab:distillation_hyperparameters}
+\end{table}
+
+\begin{table}[htbp]
+    \centering
+    \small
+    \begin{tabular}{ll}
+        \toprule
+        Hyperparameter & Value \\
+        \midrule
+        \texttt{bf16} & \texttt{true} \\
+        \texttt{gradient\_accumulation\_steps} & \texttt{2} \\
+        \texttt{per\_device\_train\_batch\_size} & \texttt{4} \\
+        \texttt{seed} & \texttt{42} \\
+        \texttt{num\_train\_epochs} & \texttt{4} \\
+        \texttt{use\_liger\_kernel} & \texttt{true} \\
+        \texttt{packing} & \texttt{true} \\
+        \texttt{max\_length} & \texttt{8192} \\
+        \texttt{learning\_rate} & \texttt{5.0e-05} \\
+        \texttt{lr\_scheduler\_type} & \texttt{cosine\_with\_min\_lr} \\
+        \texttt{lr\_scheduler\_kwargs.min\_lr\_rate} & \texttt{0.1} \\
+        \texttt{warmup\_ratio} & \texttt{0.05} \\
+        \bottomrule
+    \end{tabular}
+    \caption{Hyperparameters used for SFT training. The effective batch size if of 128 given our 4 nodes with 8 GPUs each. For details on these hyperameters you can refer to \protect\url{https://huggingface.co/docs/trl/sft_trainer\#trl.sft.SFTConfig}}
+    \label{tab:sft_hyperparameters}
+\end{table}
+
 
 \section{Privileged Information Prompts} \label{app: pc_prompts}
 
 \begin{figure}
     \centering
-    \caption{Caption}
+\begin{tcblisting}{
+    enhanced,
+    listing only,
+    title={Larger-Teacher Rollout Privileged Context},
+    fonttitle=\bfseries,
+    coltitle=white,
+    colback=green!2,
+    colframe=green!45!black,
+    boxrule=0.6pt,
+    arc=1.5mm,
+    left=2mm,
+    right=2mm,
+    top=1.5mm,
+    bottom=1.5mm,
+    listing options={
+        basicstyle=\ttfamily\scriptsize,
+        breaklines=true,
+        columns=fullflexible,
+        keepspaces=true,
+        showstringspaces=false,
+        escapeinside={(*@}{@*)}
+    }
+}
+(*@\textcolor{blue!70!black}{\texttt{\{prompt\}}}@*)
+
+This is an example for a response to the question:
+
+(*@\textcolor{blue!70!black}{\texttt{\{larger\_teacher\_rollout\}}}@*)
+\end{tcblisting}
+    \caption{Prompt template used to provide the intermediate teacher with a larger teacher's rollout as privileged context. The student does not see this context when generating its own rollout.}
     \label{fig: pc_rollout_example}
 \end{figure}
