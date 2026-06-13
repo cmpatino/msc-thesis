@@ -307,9 +307,19 @@ Despite the growth in epistemic words compared to the initial student model, we 
 
 One of the first works that addressed the capacity gap proposed progressively distilling from larger teachers until reaching a teacher scale that was accessible to the student \cite{mirzadehImprovedKnowledgeDistillation2019}. For example, in our case we could distill the 235B model into the 30B model, then that 30B model into the 4B model, and finally distill that 4B model into our 0.6B student. However, that process would be expensive because it would require three distillation runs to reach the objective.
 
-We wanted to follow the same idea in the context of OPD and PC while avoiding multiple distillation runs. We set up the distillation with the 0.6B student and the 4B teacher, as this combination has a small capacity gap and performance comparable to other student-teacher combinations. Instead of incorporating instructions or information about the problem as in Figures \ref{fig: pc_example} and \ref{fig: pc_vs_system_prompt_example}, we include a rollout from the 30B or 235B teacher for that prompt in the 4B teacher's privileged context. The larger teacher's rollout is therefore visible only to the 4B teacher when it scores the student's tokens, while the 0.6B student still generates rollouts from its own context. That way, the 4B teacher effectively acts as a bridge between the larger teachers and the 0.6B student. We follow an approach similar to \cite{shenfeldSelfDistillationEnablesContinual2026}, where they incorporate demonstrations from GPT-4o to show the student how the problem can be solved.
+We wanted to follow the same idea in the context of OPD and PC while avoiding multiple distillation runs. We set up the distillation with the 0.6B student and the 4B teacher, as this combination has a small capacity gap and performance comparable to other student-teacher combinations. Instead of incorporating instructions or information about the problem as in Figures \ref{fig: pc_example} and \ref{fig: pc_vs_system_prompt_example}, we include a rollout from the 30B or 235B teacher for that prompt in the 4B teacher's privileged context. The larger teacher's rollout is therefore visible only to the 4B teacher when it scores the student's tokens, while the 0.6B student still generates rollouts from its own context. That way, the 4B teacher effectively acts as a bridge between the larger teachers and the 0.6B student. We repeat this setup for the 4B scale by using the hybrid model (Qwen3-4B-no-think) as the student and the more capable Qwen3-4B-Instruct as the teacher. In all cases, we follow an approach similar to \cite{shenfeldSelfDistillationEnablesContinual2026}, to incorporate the rollouts from the 30B and 235B student with the prompt template shown in \ref{fig: pc_rollout_example}. Different to them, we don't filter for correct answers to make the methods directly comparable to other OPD experiments where also do not filter for correctness.
 
-\cs{It seems the experiment is missing?}
+The results in Figure \ref{fig: pc_rollout} show that using the 4B teacher as a bridge for information coming from larger teacher is not effective. The performance degradation is especially prominent in the 4B student, where we see a drop of 40 points compared to OPD without any privileged context. The steep drop in performance for the 4B student, which is learning from a more capable 4B teacher, highlights how using a setup with a small capacity gap is less effective than learning directly from a teacher even with a large capacity gap.
+
+These results align with prior results that show how self-distillation is not effective below the 7B scale because smaller models have weaker in-context learning capabilities \cite{shenfeldSelfDistillationEnablesContinual2026}. What these results show is that it is preferable to have a large capacity gap and a capable teacher than a small capacity gap with a teacher that has weak in-context learning skills.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.9\linewidth]{figures/pc_rollout_gap_recovery.png}
+    \caption{Results of using PC to use a 4B teacher as a bridge for 30B and 235B teachers. The results show that the approach does not work as evidence by the 40-point degradation for the 4B student and the the lack of gains in the 0.6B student.}
+    \label{fig: pc_rollout}
+\end{figure}
+
 
 \section{Extending from top-1 to top-$K$ Log Probabilities} \label{sec: exps_top_k}
 
@@ -347,22 +357,37 @@ This behavior presents another symptom of the capacity gap and shows how a small
 
 \section{Catastrophic Forgetting and OOD Reasoning} \label{sec: exps_catastrophic_ood}
 
-Throughout the experiments in the previous sections, we targeted the mathematical reasoning skills of the students. AIME25 was the main metric for that purpose, but we also tracked GPQA-Diamond and IFEval to measure whether distillation affected out-of-distribution reasoning and instruction following. This is important because improvements on the target domain can come at the cost of broader capabilities, especially when the student is much smaller than the teacher.
+Throughout the experiments in the previous sections, we targeted the mathematical reasoning skills of the students. AIME25 was the main metric for that purpose, but we also tracked GPQA-Diamond and IFEval to measure whether distillation affected out-of-distribution reasoning and instruction following. This is important because improvements on the target domain can come at the cost of broader capabilities, especially when the student is much smaller than the teacher. We focus on the analysis of GPQA and leave the IFEval results for the Appendix (\ref{sec: app_ifeval_forgettin}).
 
-Figure~\ref{fig: gpqa_reasoning} shows how GPQA-Diamond changes across student--teacher combinations. The 0.6B and 4B students behave differently. For the 0.6B student, GPQA performance declines as we increase the teacher size, which suggests that specializing the model for mathematical reasoning displaces some of its existing scientific reasoning capability. For the 4B student, performance is stable or slightly improves, indicating that the larger student has enough capacity to absorb the math-focused feedback while retaining more of its out-of-distribution reasoning behavior.
+Figure~\ref{fig: gpqa_vs_aime} shows how GPQA-Diamond changes across student--teacher combinations and compares it to the gap recovery rate in AIME25. The 0.6B and 4B students behave differently. For the 0.6B student, GPQA performance declines as we increase the teacher size, which suggests that specializing the model for mathematical reasoning displaces some of its existing scientific reasoning capability. For the 4B student, performance is stable or slightly improves, indicating that the larger student has enough capacity to absorb the math-focused feedback while retaining more of its out-of-distribution reasoning behavior.
 
 However, retaining GPQA performance does not mean that distillation recovers the full reasoning-mode capability of the base model. Figure~\ref{fig: aime_with_reasoning} compares the distilled students against their base and reasoning-mode references on AIME25. For the 4B student, distillation improves AIME25 by roughly 25 percentage points across the evaluated settings, but the student remains below the same model with reasoning enabled. For the 0.6B student, the distilled model reaches roughly the same AIME25 performance as its reasoning-mode reference. Taken together, these results show that OPD can recover target-domain reasoning behavior in smaller students, but the smallest student is also more vulnerable to out-of-distribution degradation when the teacher becomes too large.
 
 \begin{figure}
     \centering
-    \includegraphics[width=0.9\linewidth]{figures/pc_vs_system_gpqa.png}
+    \includegraphics[width=0.9\linewidth]{figures/recovery_aime_vs_gpqa_delta.png}
     \caption{GPQA-Diamond pass@1 after distillation across student--teacher combinations. The 0.6B student loses out-of-distribution scientific reasoning performance as the teacher size increases, while the 4B student remains stable or slightly improves. The dotted line shows the reasoning-mode reference and the dashed line shows the base model before distillation.}
-    \label{fig: gpqa_reasoning}
+    \label{fig: gpqa_vs_aime}
 \end{figure}
 
 \begin{figure}
     \centering
     \includegraphics[width=0.9\linewidth]{figures/pc_vs_system_aime_reasoning.png}
-    \caption{AIME25 pass@1 after distillation compared with the base and reasoning-mode references. Distillation substantially improves both students over step 0; the 0.6B student reaches roughly its reasoning-mode performance, while the 4B student improves strongly but remains below its reasoning-mode reference.}
+    \caption{AIME25 avg@64 after distillation compared with the base and reasoning-mode references. Distillation substantially improves both students over step 0; the 0.6B student reaches roughly its reasoning-mode performance, while the 4B student improves strongly but remains below its reasoning-mode reference.}
     \label{fig: aime_with_reasoning}
+\end{figure}
+
+\section{The Capacity Effect in the Capacity Gap}
+
+An overarching trend through the sections in this chapter is how the 4B student is able to recover the teacher gap more effectively than the 0.6B student. We summarize this result in Figure \ref{fig: capacity-summary-figure}, where we should compare the gap recovery rates for multiple method, student, and teacher combinations. The plot shows how the gap recovery rate is higher in all cases for the 4B student compared to the 0.6B student. This result is not surprising because the 4B student has a better performance before distillation and therefore has a smaller gap to recover.
+
+However, the first column of each subplot corresponds provides a more apples-to-apples comparison between the two students and shows how the 0.6B student struggles more than the 4B student under similar conditions. Specifically, the column has conditions of a 10x capacity gap for each student and a difference in AIME score of around 40 points. Despite being similar conditions, the 4B student can recover around 87\% of the capacity gap while the 0.6B only reaches 36\% in the best case. These results highlight how using a student model with the ability to incorporate feedback from a teacher is essential for a successful distillation outcome.
+
+
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.9\linewidth]{figures/methods_bubble_gap_recovery.png}
+    \caption{Summary of the experiments in this section showing the gap recovery rates for each method, student, and teacher combination. The plot shows how the gap recovery rate is higher in all cases for the 4B student compared to the 0.6B student. Additionally, it shows that using the system prompt was the most effective technique to improve student performance.}
+    \label{fig: capacity-summary-figure}
 \end{figure}
