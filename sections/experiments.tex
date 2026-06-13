@@ -1,6 +1,6 @@
 \chapter{Experiments}
 
-This chapter evaluates whether on-policy distillation can make small students learn effectively from much larger reasoning teachers. The experiments are organized around the central question of teacher-signal usability. We first compare off-policy distillation, OPD, and OPD with privileged context across teacher--student capacity gaps. We then test whether context is more effective when it is hidden in the teacher scoring prompt or made visible to the student during rollout generation. Next, we analyze rollout length, truncation, and epistemic wording as failure modes induced by large teachers. We then study whether exposing more teacher probability mass through top-$K$ log probabilities improves performance, and finally evaluate whether target-domain gains come at the cost of out-of-distribution reasoning.
+This chapter evaluates whether on-policy distillation can make small students learn effectively from much larger reasoning teachers. The experiments are organized around the central question of teacher-signal usability. We first compare off-policy distillation, OPD, and OPD with privileged context across teacher--student capacity gaps. We then test whether context is more effective when it is hidden in the teacher scoring prompt or made visible to the student during rollout generation. Next, we analyze rollout length, truncation, and epistemic wording as failure modes induced by large teachers. We then test whether privileged context can emulate teacher-assisted distillation by routing larger-teacher rollouts through a smaller scoring teacher. Finally, we study whether exposing more teacher probability mass through top-$K$ log probabilities improves performance, evaluate whether target-domain gains come at the cost of out-of-distribution reasoning, and synthesize the results into a capacity-effect analysis.
 
 \section{OPD with Privileged Context} \label{sec: exp_opd_and_pc}
 
@@ -303,20 +303,20 @@ Despite the growth in epistemic words compared to the initial student model, we 
 
 \FloatBarrier
 
-\section{Using Privileged Context for Teacher-Assisted Distillation}
+\section{Using Privileged Context for Teacher-Assisted Distillation} \label{sec: exps_teacher_assisted_pc}
 
 One of the first works that addressed the capacity gap proposed progressively distilling from larger teachers until reaching a teacher scale that was accessible to the student \cite{mirzadehImprovedKnowledgeDistillation2019}. For example, in our case we could distill the 235B model into the 30B model, then that 30B model into the 4B model, and finally distill that 4B model into our 0.6B student. However, that process would be expensive because it would require three distillation runs to reach the objective.
 
-We wanted to follow the same idea in the context of OPD and PC while avoiding multiple distillation runs. We set up the distillation with the 0.6B student and the 4B teacher, as this combination has a small capacity gap and performance comparable to other student-teacher combinations. Instead of incorporating instructions or information about the problem as in Figures \ref{fig: pc_example} and \ref{fig: pc_vs_system_prompt_example}, we include a rollout from the 30B or 235B teacher for that prompt in the 4B teacher's privileged context. The larger teacher's rollout is therefore visible only to the 4B teacher when it scores the student's tokens, while the 0.6B student still generates rollouts from its own context. That way, the 4B teacher effectively acts as a bridge between the larger teachers and the 0.6B student. We repeat this setup for the 4B scale by using the hybrid model (Qwen3-4B-no-think) as the student and the more capable Qwen3-4B-Instruct as the teacher. In all cases, we follow an approach similar to \cite{shenfeldSelfDistillationEnablesContinual2026}, to incorporate the rollouts from the 30B and 235B student with the prompt template shown in \ref{fig: pc_rollout_example}. Different to them, we don't filter for correct answers to make the methods directly comparable to other OPD experiments where also do not filter for correctness.
+We wanted to follow the same idea in the context of OPD and PC while avoiding multiple distillation runs. We set up distillation with the 0.6B student and the 4B teacher, because this combination has a small capacity gap and performance comparable to other student--teacher combinations. Instead of incorporating instructions or information about the problem, as in Figures \ref{fig: pc_example} and \ref{fig: pc_vs_system_prompt_example}, we include a rollout from the 30B or 235B teacher for the same prompt in the 4B teacher's privileged context. The larger teacher's rollout is therefore visible only to the 4B teacher when it scores the student's tokens, while the 0.6B student still generates rollouts from its own context. In this setup, the 4B teacher acts as a bridge between the larger teachers and the 0.6B student. We repeat this setup at the 4B scale by using the hybrid model (Qwen3-4B-no-think) as the student and the more capable Qwen3-4B-Instruct as the teacher. In all cases, we follow an approach similar to \cite{shenfeldSelfDistillationEnablesContinual2026} by incorporating rollouts from the 30B and 235B teachers with the prompt template shown in Figure \ref{fig: pc_rollout_example}. Unlike that work, we do not filter for correct answers, so the method remains directly comparable to our other OPD experiments, which also do not filter for correctness.
 
-The results in Figure \ref{fig: pc_rollout} show that using the 4B teacher as a bridge for information coming from larger teacher is not effective. The performance degradation is especially prominent in the 4B student, where we see a drop of 40 points compared to OPD without any privileged context. The steep drop in performance for the 4B student, which is learning from a more capable 4B teacher, highlights how using a setup with a small capacity gap is less effective than learning directly from a teacher even with a large capacity gap.
+The results in Figure \ref{fig: pc_rollout} show that using the 4B teacher as a bridge for information from larger teachers is not effective. The performance degradation is especially prominent for the 4B student, where we see a drop of 40 points compared to OPD without privileged context. The steep drop in performance for the 4B student, which is learning from a more capable 4B teacher, shows that a small capacity gap is not sufficient when the intermediate teacher cannot use the additional context effectively.
 
-These results align with prior results that show how self-distillation is not effective below the 7B scale because smaller models have weaker in-context learning capabilities \cite{shenfeldSelfDistillationEnablesContinual2026}. What these results show is that it is preferable to have a large capacity gap and a capable teacher than a small capacity gap with a teacher that has weak in-context learning skills.
+These results align with prior findings that self-distillation is not effective below the 7B scale because smaller models have weaker in-context learning capabilities \cite{shenfeldSelfDistillationEnablesContinual2026}. In this setting, it is preferable to learn directly from a capable teacher, even with a larger capacity gap, than to reduce the gap by routing the signal through a teacher with weaker in-context learning ability.
 
 \begin{figure}
     \centering
     \includegraphics[width=0.9\linewidth]{figures/pc_rollout_gap_recovery.png}
-    \caption{Results of using PC to use a 4B teacher as a bridge for 30B and 235B teachers. The results show that the approach does not work as evidence by the 40-point degradation for the 4B student and the the lack of gains in the 0.6B student.}
+    \caption{Results of using PC to make a 4B teacher act as a bridge for 30B and 235B teachers. The approach is ineffective, as shown by the 40-point degradation for the 4B student and the lack of gains for the 0.6B student.}
     \label{fig: pc_rollout}
 \end{figure}
 
@@ -325,33 +325,16 @@ These results align with prior results that show how self-distillation is not ef
 
 Because PC and system-prompt interventions did not solve the capacity gap when scaling the teacher, we next explored results showing that increasing the number of log probabilities used for training can improve student performance in OPD settings \cite{hubotterReinforcementLearningSelfDistillation2026}. Scaling the number of log probabilities is expensive when using a separate server for the teacher, because we need to transfer the log probabilities from the server hosting the teacher to the GPUs hosting the student model \cite{patino2026_distilling_100b_models_40x_faster_with_trl}. For that reason, we restrict our analysis to $K \in \{1, 10, 50\}$.
 
-We calculated the probability mass coverage, as defined in Section \ref{sec:metrics}, for each $K$ value and student-teacher combination. The results in Table~\ref{tab:top-k-coverage} show that mass coverage increases quickly with $K$. With $K=10$, coverage is already above 0.92 for every evaluated pair, and with $K=50$ it reaches at least 0.986. For the larger teachers, $K=50$ reaches 0.993 coverage for the 0.6B student and at least 0.997 coverage for the 4B student. This suggested that increasing $K$ might improve student performance because the loss captures most of the teacher probability mass.
+For each $K$ value and student--teacher combination, we calculated the probability mass coverage defined in Section \ref{sec:metrics}. Figure \ref{fig: top-k_effect} plots AIME performance against this coverage, with marker shape indicating the corresponding $K$. This view lets us separate two related questions: whether increasing $K$ exposes more of the teacher distribution, and whether that additional probability mass improves the student.
 
-\begin{table}[ht]
-  \centering
-  \caption{Probability mass coverage for different top-$K$ values and student-teacher combinations. The 4B/4B setting was not evaluated. \cs{So? What is conclusion?}}
-  \label{tab:top-k-coverage}
-  \begin{tabular}{l l r r r}
-    \toprule
-    Student & Teacher & $K=1$ & $K=10$ & $K=50$ \\
-    \midrule
-    0.6B & 4B   & 0.702 & 0.923 & 0.986 \\
-    0.6B & 30B  & 0.713 & 0.941 & 0.993 \\
-    0.6B & 235B & 0.713 & 0.941 & 0.993 \\
-    4B   & 30B  & 0.790 & 0.972 & 0.997 \\
-    4B   & 235B & 0.775 & 0.974 & 0.998 \\
-    \bottomrule
-  \end{tabular}
-\end{table}
+The results contradict the hypothesis that higher coverage should directly improve student performance. Increasing $K$ moves the points to the right, showing that the loss captures more of the teacher distribution, but the corresponding AIME score does not reliably increase. The only clear positive case is the 0.6B student trained with the 4B teacher, where performance improves as coverage increases. For the larger teachers, higher coverage leaves performance nearly unchanged or makes it worse, even when coverage approaches the full teacher distribution.
 
-However, Figure \ref{fig: top-k_effect} contradicts the hypothesis that higher coverage should directly improve student performance. AIME scores decrease or remain stable as we increase $K$. The only exception is the 0.6B student trained with the 4B teacher, where performance improves as we scale $K$. This contrast is especially clear for the larger teachers: even when $K=50$ covers 0.993--0.998 of the probability mass, performance does not improve.
-
-This behavior presents another symptom of the capacity gap and shows how a small student struggles to use feedback from a much larger teacher. In all cases, performance either stays the same or decreases when using the 30B and 235B teachers. This behavior shows that larger probability coverage does not necessarily translate into higher student performance. Coverage measures how much of the teacher distribution is exposed to the student, but not whether the student can represent or learn from that distribution. Additionally, it highlights the challenge of giving effective feedback in scenarios with a large capacity gap.
+This behavior presents another symptom of the capacity gap and shows how a small student struggles to use feedback from a much larger teacher. Larger probability coverage does not necessarily translate into higher student performance. Coverage measures how much of the teacher distribution is exposed to the student, but not whether the student can represent or learn from that distribution. Additionally, it highlights the challenge of giving effective feedback in scenarios with a large capacity gap.
 
 \begin{figure}
     \centering
     \includegraphics[width=0.9\linewidth]{figures/best_aime_vs_top_k.png}
-    \caption{Effect of increasing the top-$K$ log probabilities. The 0.6B student benefits from increasing $K$ for the smallest teacher, but its performance degrades when using more log probabilities from the 235B teacher. These results suggest that the 0.6B student cannot capture the increasing complexity of the large teacher but benefits from more detailed feedback from a teacher within its reach. For the 4B student, scaling $K$ does not have a positive impact since its performance remains constant or decreases for all teachers.}
+    \caption{AIME performance as a function of probability mass coverage for different top-$K$ losses. Marker shape indicates $K$, while color indicates teacher size. Increasing $K$ increases coverage, but higher coverage does not reliably improve performance. The 0.6B student benefits from higher coverage only with the 4B teacher, while performance is stable or worse for larger teachers. For the 4B student, increasing coverage also fails to produce consistent gains.}
     \label{fig: top-k_effect}
 \end{figure}
 
@@ -377,17 +360,17 @@ However, retaining GPQA performance does not mean that distillation recovers the
     \label{fig: aime_with_reasoning}
 \end{figure}
 
-\section{The Capacity Effect in the Capacity Gap}
+\section{The Capacity Effect in the Capacity Gap} \label{sec: exps_capacity_effect}
 
-An overarching trend through the sections in this chapter is how the 4B student is able to recover the teacher gap more effectively than the 0.6B student. We summarize this result in Figure \ref{fig: capacity-summary-figure}, where we should compare the gap recovery rates for multiple method, student, and teacher combinations. The plot shows how the gap recovery rate is higher in all cases for the 4B student compared to the 0.6B student. This result is not surprising because the 4B student has a better performance before distillation and therefore has a smaller gap to recover.
+An overarching trend throughout this chapter is that the 4B student recovers the teacher--student gap more effectively than the 0.6B student. We summarize this result in Figure \ref{fig: capacity-summary-figure}, which compares gap recovery rates across methods, students, and teachers. The plot shows that the gap recovery rate is higher for the 4B student in every evaluated setting. This result is partly expected because the 4B student starts from stronger performance before distillation and therefore has a smaller gap to recover.
 
-However, the first column of each subplot corresponds provides a more apples-to-apples comparison between the two students and shows how the 0.6B student struggles more than the 4B student under similar conditions. Specifically, the column has conditions of a 10x capacity gap for each student and a difference in AIME score of around 40 points. Despite being similar conditions, the 4B student can recover around 87\% of the capacity gap while the 0.6B only reaches 36\% in the best case. These results highlight how using a student model with the ability to incorporate feedback from a teacher is essential for a successful distillation outcome.
+However, the first column of each subplot gives the closest comparison between the two students in Figure \ref{fig: capacity-summary-figure}. In both cases, the teacher is the smallest available teacher above the student, and the teacher--student AIME gap is of similar magnitude. Under these conditions, the 4B student recovers around 87\% of the gap, while the 0.6B student reaches only 36\% in the best case. These results suggest that the capacity gap is not determined only by the teacher--student performance difference. The student's own capacity to represent and use the teacher signal is also central to the distillation outcome.
 
 
 
 \begin{figure}
     \centering
     \includegraphics[width=0.9\linewidth]{figures/methods_bubble_gap_recovery.png}
-    \caption{Summary of the experiments in this section showing the gap recovery rates for each method, student, and teacher combination. The plot shows how the gap recovery rate is higher in all cases for the 4B student compared to the 0.6B student. Additionally, it shows that using the system prompt was the most effective technique to improve student performance.}
+    \caption{Summary of the experiments in this chapter showing the gap recovery rates for each method, student, and teacher combination. The gap recovery rate is higher for the 4B student than for the 0.6B student in all evaluated settings. The plot also shows that using the system prompt was the most effective intervention for improving student performance.}
     \label{fig: capacity-summary-figure}
 \end{figure}
