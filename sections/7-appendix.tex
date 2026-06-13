@@ -26,9 +26,16 @@ The results in Figure~\ref{fig: opd_vs_off-policy} show that OPD is stronger tha
 
 \FloatBarrier
 
-\section{Distilling Reasoning to Reasoning Models}
-
 \section{TAID Results}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.9\linewidth]{figures/taid.png}
+    \caption{Results for our on-policy implementation of TAID compared to OPD and with the system prompt setup from Section \ref{sec: exps_system_prompt}. The results show that TAID is a promising technique to address the capacity gap because its performance matches our best technique for the 0.6B student and 4B teacher combination.}
+    \label{fig:placeholder}
+\end{figure}
+
+\FloatBarrier
 
 \section{Hyperparameters} \label{app: hyperparameters}
 
@@ -87,6 +94,7 @@ The results in Figure~\ref{fig: opd_vs_off-policy} show that OPD is stronger tha
     \label{tab:sft_hyperparameters}
 \end{table}
 
+\FloatBarrier
 
 \section{Privileged Information Prompts} \label{app: pc_prompts}
 
@@ -121,6 +129,6 @@ This is an example for a response to the question:
 
 (*@\textcolor{blue!70!black}{\texttt{\{larger\_teacher\_rollout\}}}@*)
 \end{tcblisting}
-    \caption{Prompt template used to provide the intermediate teacher with a larger teacher's rollout as privileged context. The student does not see this context when generating its own rollout.}
+    \caption{Prompt template used to provide the intermediate teacher with a larger teacher's rollout as privileged context. The student does not see this context when generating its own rollout. The \texttt{prompt} placeholder contains the problem description and the \texttt{larger\_teacher\_rollout} is replaced by the teacher rollout for the prompt.}
     \label{fig: pc_rollout_example}
 \end{figure}
