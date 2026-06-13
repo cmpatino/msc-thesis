@@ -1,6 +1,6 @@
 \chapter{Experiments}
 
-\cs{Maybe a short intro text to guide the reader through what is coming. Some expectation management so to say.}
+This chapter evaluates whether on-policy distillation can make small students learn effectively from much larger reasoning teachers. The experiments are organized around the central question of teacher-signal usability. We first compare off-policy distillation, OPD, and OPD with privileged context across teacher--student capacity gaps. We then test whether context is more effective when it is hidden in the teacher scoring prompt or made visible to the student during rollout generation. Next, we analyze rollout length, truncation, and epistemic wording as failure modes induced by large teachers. We then study whether exposing more teacher probability mass through top-$K$ log probabilities improves performance, and finally evaluate whether target-domain gains come at the cost of out-of-distribution reasoning.
 
 \section{OPD with Privileged Context} \label{sec: exp_opd_and_pc}
 
