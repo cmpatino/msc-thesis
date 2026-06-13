@@ -366,9 +366,7 @@ An overarching trend throughout this chapter is that the 4B student recovers the
 
 However, the first column of each subplot gives the closest comparison between the two students in Figure \ref{fig: capacity-summary-figure}. In both cases, the teacher is the smallest available teacher above the student, and the teacher--student AIME gap is of similar magnitude. Under these conditions, the 4B student recovers around 87\% of the gap, while the 0.6B student reaches only 36\% in the best case. These results suggest that the capacity gap is not determined only by the teacher--student performance difference. The student's own capacity to represent and use the teacher signal is also central to the distillation outcome.
 
-
-
-\begin{figure}
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.9\linewidth]{figures/methods_bubble_gap_recovery.png}
     \caption{Summary of the experiments in this chapter showing the gap recovery rates for each method, student, and teacher combination. The gap recovery rate is higher for the 4B student than for the 0.6B student in all evaluated settings. The plot also shows that using the system prompt was the most effective intervention for improving student performance.}

@@ -1,19 +1,22 @@
 \chapter{Appendix}
 
+% Figures are pinned in place with [H]; raggedbottom lets leftover vertical
+% space fall to the bottom of the page instead of being stretched into gaps
+% above section headings.
+\raggedbottom
+
 \section{OPD vs Off-Policy Methods} \label{sec: exps_off_vs_on}
 
 We compare the three distillation methods that only use feedback from the sampled token at each position. OPD uses the token sampled by the student and scores it under both the student and teacher policies. The two off-policy methods instead use teacher-generated rollouts: SFT treats the sampled token as a hard target, while the soft target objective also includes the teacher log probability for that sampled token.
 
 The results in Figure~\ref{fig: opd_vs_off-policy} show that OPD is stronger than both off-policy methods across all evaluated student--teacher combinations. Among the off-policy methods, SFT consistently performs better than the soft target objective. The soft off-policy objective has worse absolute performance in every setting and also scales worse with teacher size: its gap recovery rate declines more sharply than SFT for both students. These results suggest that, when only the sampled token is available, adding the teacher's probability for a teacher-generated token is not enough to recover the benefit of training on the student's own rollout distribution.
 
-\begin{figure}
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.9\linewidth]{figures/off_vs_on_policy.png}
     \caption{Gap recovery rate for the three distillation methods that use only the sampled token at each position. OPD performs best for both students across teacher sizes. Among the off-policy methods, SFT is consistently stronger than the soft target objective, which has lower gap recovery in every setting and degrades more when scaling the teacher.}
     \label{fig: opd_vs_off-policy}
 \end{figure}
-
-\FloatBarrier
 
 \section{Catastrophic Forgetting in IFEval} \label{sec: app_ifeval_forgettin}
 
@@ -21,14 +24,12 @@ Figure~\ref{fig: ifeval_reasoning} shows that the math-focused distillation runs
 
 There is a slight dependence on teacher size. For several methods, the IFEval change becomes smaller as the teacher becomes larger, but the difference between teacher sizes stays within two IFEval points. The clearest negative values come from the system-prompt setup, which is also the method with the highest AIME gap recovery. This shows a weak negative relationship between AIME improvement and IFEval retention: the strongest math gains can come with a small instruction-following cost, but the magnitude of the tradeoff is limited.
 
-\begin{figure}
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.9\linewidth]{figures/recovery_aime_vs_ifeval_delta.png}
     \caption{Change in IFEval performance relative to the initial student as a function of AIME gap recovery. The plots show that IFEval remains stable across the evaluated distillation settings, with only small declines below the initial student baseline. Larger teachers produce slightly steeper IFEval declines, but the differences remain within two IFEval points. The system-prompt setup reaches the highest AIME recovery while also showing the largest IFEval drop, indicating a weak negative correlation between target-domain math gains and instruction-following retention.}
     \label{fig: ifeval_reasoning}
 \end{figure}
-
-\FloatBarrier
 
 \section{TAID Results}
 
@@ -36,18 +37,16 @@ TAID constructs an adaptive intermediate distribution between the student and te
 
 The original TAID method is not an on-policy method. In this work, we implement an on-policy version by applying the adaptive intermediate target on student-generated rollouts, so the student still receives feedback on the states it actually visits during training. This is a methodological contribution because it combines TAID's capacity-gap interpolation with the OPD setting studied in this thesis. We only ran this experiment for the 0.6B student with the 4B teacher, so we do not treat it as a complete evaluation. However, the result in Figure~\ref{fig: taid_results} is promising: on-policy TAID reaches performance comparable to the system-prompt setup, which is the best-performing method for this student--teacher pair. This suggests that on-policy TAID is a strong direction for future work on making larger-teacher feedback more usable for small students.
 
-\begin{figure}
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.9\linewidth]{figures/taid.png}
     \caption{AIME25 performance for the 0.6B student trained with the 4B teacher. Our on-policy TAID implementation applies TAID's adaptive intermediate target to student-generated rollouts and substantially improves over top-1 OPD. Its final performance is comparable to the system-prompt setup from Section~\ref{sec: exps_system_prompt}, which is the strongest method we evaluated for this student--teacher combination.}
     \label{fig: taid_results}
 \end{figure}
 
-\FloatBarrier
-
 \section{Hyperparameters} \label{app: hyperparameters}
 
-\begin{table}[htbp]
+\begin{table}[H]
     \centering
     \small
     \begin{tabular}{ll}
@@ -77,7 +76,7 @@ The original TAID method is not an on-policy method. In this work, we implement 
     \label{tab:distillation_hyperparameters}
 \end{table}
 
-\begin{table}[htbp]
+\begin{table}[H]
     \centering
     \small
     \begin{tabular}{ll}
@@ -102,11 +101,9 @@ The original TAID method is not an on-policy method. In this work, we implement 
     \label{tab:sft_hyperparameters}
 \end{table}
 
-\FloatBarrier
-
 \section{Privileged Information Prompts} \label{app: pc_prompts}
 
-\begin{figure}
+\begin{figure}[H]
     \centering
 \begin{tcblisting}{
     enhanced,
