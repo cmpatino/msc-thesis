@@ -4,7 +4,7 @@ This chapter defines the methodological framework used to study distillation und
 
 \section{Distillation Formalism} \label{sec:distillation_formalism}
 
-Following the notation of on-policy generalized knowledge distillation \cite{agarwalOnPolicyDistillationLanguage2024}, let $x$ denote a prompt, let $V$ denote the vocabulary, and let $y = (y_1, y_2, \ldots, y_{L_y})$ denote an output sequence. The prefix before token $y_n$ is $y_{<n} = (y_1, \ldots, y_{n-1})$. We write the student policy as $\pi_\theta(\cdot \mid x, y_{<n})$ and the teacher policy as $\pi_T(\cdot \mid x, y_{<n})$, both of which define next-token distributions over $V$.
+Following the notation of on-policy generalized knowledge distillation \citep{agarwalOnPolicyDistillationLanguage2024}, let $x$ denote a prompt, let $V$ denote the vocabulary, and let $y = (y_1, y_2, \ldots, y_{L_y})$ denote an output sequence. The prefix before token $y_n$ is $y_{<n} = (y_1, \ldots, y_{n-1})$. We write the student policy as $\pi_\theta(\cdot \mid x, y_{<n})$ and the teacher policy as $\pi_T(\cdot \mid x, y_{<n})$, both of which define next-token distributions over $V$.
 
 The simplest distillation objective is SFT, which treats a target sequence as a hard label $y_n$ and trains the student with cross-entropy. If $\mathcal{D}$ is a dataset of prompt--completion pairs, where the completions can be human-written or sampled from the teacher, the loss is
 
@@ -44,12 +44,12 @@ D_{\mathrm{KL}}(\pi_\theta \| \pi_T)(y \mid x)
 %
 The distinction is important because KL divergence is asymmetric. Forward KL (FKL) averages the log-ratio under the teacher distribution, so it penalizes the student for failing to place probability mass on tokens the teacher considers likely. This makes it a mass-covering objective. Reverse KL (RKL) averages under the student distribution, so it penalizes tokens the student samples when the teacher assigns them low probability. This makes it more mode-seeking and can be useful when a lower-capacity student cannot match the full teacher distribution.
 
-We show the distinction graphically in Figure~\ref{fig:toy_forward_vs_reverse} using a plot from \cite{guMiniLLMOnPolicyDistillation2026} that shows how the forward and reverse KL fit a Gaussian mixture distribution with a single Gaussian distribution. The reverse KL seeks the major mode of the mixture while the forward KL tries to fit all three.
+We show the distinction graphically in Figure~\ref{fig:toy_forward_vs_reverse} using a plot from \citet{guMiniLLMOnPolicyDistillation2026} that shows how the forward and reverse KL fit a Gaussian mixture distribution with a single Gaussian distribution. The reverse KL seeks the major mode of the mixture while the forward KL tries to fit all three.
 
 \begin{figure}[h]
     \centering
     \includegraphics[width=0.5\linewidth]{figures/forward_vs_reverse.pdf}
-    \caption{Image from \cite{guMiniLLMOnPolicyDistillation2026} showing the difference of using forward and reverse KL to fit a mixture of three Gaussians. The reverse KL tries to fit the major mode while the forward KL tries to approximate the three modes.}
+    \caption{Image from \citet{guMiniLLMOnPolicyDistillation2026} showing the difference of using forward and reverse KL to fit a mixture of three Gaussians. The reverse KL tries to fit the major mode while the forward KL tries to approximate the three modes.}
     \label{fig:toy_forward_vs_reverse}
 \end{figure}
 
@@ -110,7 +110,7 @@ Regardless of the loss function we choose, we can specify what the teacher and s
 
 \section{Privileged Context} \label{sec: methods_pc}
 
-Privileged context is additional information that is available to the teacher during training but will not be available to the student at inference time. Following the privileged information distillation setting  \cite{shenfeldSelfDistillationEnablesContinual2026, hubotterReinforcementLearningSelfDistillation2026, penalozaPrivilegedInformationDistillation2026, zhaoSelfDistilledReasonerOnPolicy2026}, the key asymmetry is that the teacher is conditioned on this extra information, while the student is not. Using the notation of Section~\ref{sec:distillation_formalism}, let $c$ denote the privileged context associated with a prompt $x$. This context can take different forms, such as a reference solution, a successful action trace, tool calls, or a hint extracted from a stronger model. The student policy remains
+Privileged context is additional information that is available to the teacher during training but will not be available to the student at inference time. Following the privileged information distillation setting  \citep{shenfeldSelfDistillationEnablesContinual2026, hubotterReinforcementLearningSelfDistillation2026, penalozaPrivilegedInformationDistillation2026, zhaoSelfDistilledReasonerOnPolicy2026}, the key asymmetry is that the teacher is conditioned on this extra information, while the student is not. Using the notation of Section~\ref{sec:distillation_formalism}, let $c$ denote the privileged context associated with a prompt $x$. This context can take different forms, such as a reference solution, a successful action trace, tool calls, or a hint extracted from a stronger model. The student policy remains
 
 \begin{equation}
 \pi_\theta(\cdot \mid x, y_{<n}),
@@ -302,7 +302,7 @@ A teacher-support top-$k$ reverse-KL objective can only provide token-level supe
 This is the student probability mass that falls inside the teacher's top-$k$, averaged over prefixes. Its complement $1-\mathrm{Coverage}_{k}$ is the student mass lying outside the teacher's top-$k$, i.e. the fraction of the student's distribution that a teacher top-$k$ support cannot supervise at the token level.
 
 \noindent\textbf{Gap Recovery.}
-We are not only interested in the final performance of the student, but also in how much of the teacher performance the student recovers. Following \cite{liRethinkingOnPolicyDistillation2026}, we measure the recovered teacher-student gap as
+We are not only interested in the final performance of the student, but also in how much of the teacher performance the student recovers. Following \citet{liRethinkingOnPolicyDistillation2026}, we measure the recovered teacher-student gap as
 \begin{equation}
 \mathrm{GapRecovery}
 =

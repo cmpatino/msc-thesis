@@ -1,0 +1,83 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% University of Amsterdam -- Master of AI thesis
+% Built on the master_ai_thesis_template (H. Kervadec)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\documentclass{mscaithesis}  % add option [license] to print a CC-BY-NC license page
+
+% Math packages are (on purpose) not included in the class
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{amsthm}
+
+\usepackage{natbib}
+
+% Packages required by the thesis content
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{placeins}
+\usepackage[most]{tcolorbox}
+
+% Editing / review helper commands
+\newcommand{\red}[1]{{\color{red}{#1}}}
+\newcommand{\cs}[1]{\textcolor{orange}{CS: #1}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% DOCUMENT METADATA
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\title{Teacher-Signal Usability in\\ Extreme-Gap Distillation}
+
+\date{2026/06}
+
+\author{Carlos Miguel \textsc{Patiño}}
+\studentnumber{15485250}
+\period{January -- June 2026}
+\credits{36 ECTS}
+\examiner{Dr F.~\textsc{Pascoal dos Santos}}
+\supervisors{%
+        Dr E.~\textsc{Beeching}\\
+        Dr K.~\textsc{Rasul}\\
+        Dr L.~\textsc{Tunstall}\\
+        Prof.\ dr.\ C.G.M.~\textsc{Snoek}%
+}
+
+\begin{document}
+\maketitle
+
+\frontmatter
+        \chapter*{Abstract}
+                \begin{adjustwidth}{2cm}{2cm}
+                        \input{sections/abstract}
+                \end{adjustwidth}
+
+\tableofcontents
+
+\listoffigures
+
+\listoftables
+
+\setlength{\parskip}{5pt}
+
+\include{sections/0-list-symbols}
+
+
+\mainmatter
+        \include{sections/1-introduction}
+        \include{sections/2-related-work}
+        \include{sections/3-methods}
+        \include{sections/4-experimental-setup}
+        \include{sections/5-experiments}
+        \include{sections/6-conclusion}
+
+\bibliographystyle{ACM-Reference-Format}
+\bibliography{bibliographies/references}
+
+\appendix
+        \include{sections/7-appendix}
+
+\end{document}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

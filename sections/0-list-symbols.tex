@@ -1,0 +1,38 @@
+\chapter{List of Symbols}
+        This list of notation can help the reader decipher the thesis:
+
+        \begin{align*}
+                x                                       && \text{input prompt;} \\
+                y = (y_1, \ldots, y_{L_y})              && \text{output sequence of length $L_y$;} \\
+                y_{<n}                                  && \text{prefix $(y_1, \ldots, y_{n-1})$ before token $y_n$;} \\
+                V                                       && \text{vocabulary;} \\
+                c                                       && \text{privileged context (seen only by the teacher);} \\
+                \pi_\theta(\cdot \mid x, y_{<n})        && \text{student policy with parameters $\theta$;} \\
+                \pi_T(\cdot \mid x, y_{<n})             && \text{teacher policy;} \\
+                \pi_T^{c}                               && \text{teacher policy conditioned on privileged context $c$;} \\
+                D_{\mathrm{KL}}(\cdot \,\|\, \cdot)     && \text{Kullback--Leibler divergence;} \\
+                k                                       && \text{number of retained top-$k$ tokens;} \\
+                S_{T,n}^{k},\; S_{\theta,n}^{k}         && \text{teacher / student top-$k$ token sets at prefix $n$;} \\
+                \tau_S                                  && \text{tail bucket grouping all tokens in $V \setminus S$;} \\
+                \mathrm{Coverage}_{k}                   && \text{student probability mass inside the teacher top-$k$;} \\
+                \mathrm{GapRecovery}                    && \text{fraction of the teacher--student gap recovered.}
+        \end{align*}
+
+
+\chapter{List of Abbreviations}
+        \begin{table}[h]
+                \centering
+                \begin{tabular}{cl}
+                                KL      & Kullback--Leibler (divergence) \\
+                                FKL     & Forward KL \\
+                                RKL     & Reverse KL \\
+                                TS-RKL  & Teacher-Support Reverse KL \\
+                                SFT     & Supervised fine-tuning \\
+                                OPD     & On-policy distillation \\
+                                PC      & Privileged context \\
+                                CD      & Context distillation \\
+                                OOD     & Out-of-distribution \\
+                                TRL     & Transformer Reinforcement Learning (library) \\
+                                ECTS    & European Credit Transfer System
+                \end{tabular}
+        \end{table}

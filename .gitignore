@@ -15,9 +15,11 @@
 *.lot
 *.synctex.gz
 *-eps-converted-to.pdf
+# ...but keep the title-page logo conversion so builds work without --shell-escape
+!media/titlepage/uvalogo_g_instituut_voor_informatica-eps-converted-to.pdf
 
 # Compiled thesis output
-main.pdf
+msc_thesis.pdf
 
 # Working/context docs
 artifacts/
