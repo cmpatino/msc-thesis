@@ -2,6 +2,8 @@
 
 This chapter evaluates whether on-policy distillation can make small students learn effectively from much larger reasoning teachers. The experiments are organized around the central question of teacher-signal usability. We first compare off-policy distillation, OPD, and OPD with privileged context across teacher--student capacity gaps. We then test whether context is more effective when it is hidden in the teacher scoring prompt or made visible to the student during rollout generation. Next, we analyze rollout length, truncation, and epistemic wording as failure modes induced by large teachers. We then test whether privileged context can emulate teacher-assisted distillation by routing larger-teacher rollouts through a smaller scoring teacher. Finally, we study whether exposing more teacher probability mass through top-$K$ log probabilities improves performance, evaluate whether target-domain gains come at the cost of out-of-distribution reasoning, and synthesize the results into a capacity-effect analysis.
 
+The chapter presents the results in two complementary forms. Sections~\ref{sec: exp_opd_and_pc}--\ref{sec: exps_catastrophic_ood} show how the interventions and diagnostics behave as teacher size changes, exposing method-specific failure modes. Section~\ref{sec: exps_capacity_effect} then collapses the main target-domain results into a capacity-alignment map, allowing the overall pattern across students, teachers, and interventions to be compared directly.
+
 \section{OPD with Privileged Context} \label{sec: exp_opd_and_pc}
 
 \begin{figure}
@@ -360,15 +362,17 @@ However, retaining GPQA performance does not mean that distillation recovers the
     \label{fig: aime_with_reasoning}
 \end{figure}
 
-\section{The Capacity Effect in the Capacity Gap} \label{sec: exps_capacity_effect}
+\section{Absolute Student Capacity Shapes Gap Recovery} \label{sec: exps_capacity_effect}
 
-An overarching trend throughout this chapter is that the 4B student recovers the teacher--student gap more effectively than the 0.6B student. We summarize this result in Figure \ref{fig: capacity-summary-figure}, which compares gap recovery rates across methods, students, and teachers. The plot shows that the gap recovery rate is higher for the 4B student in every evaluated setting. This result is partly expected because the 4B student starts from stronger performance before distillation and therefore has a smaller gap to recover.
+Figures~\ref{fig: top-k_effect}--\ref{fig: capacity-summary-figure} summarize the central distinction between signal exposure and signal usability. Figure~\ref{fig: top-k_effect} shows that exposing more teacher probability mass does not necessarily improve AIME. Figure~\ref{fig: gpqa_vs_aime} shows that target-domain recovery can come with capacity-dependent out-of-distribution cost. Figure~\ref{fig: aime_with_reasoning} places those gains relative to each student's base and reasoning-mode references. Figure~\ref{fig: capacity-summary-figure} then summarizes the target-domain side of the story by showing how much of the teacher--student gap each student recovers across the main interventions.
+
+An overarching trend throughout this chapter is that the 4B student recovers the teacher--student gap more effectively than the 0.6B student. We summarize this result in Figure \ref{fig: capacity-summary-figure}, which compares gap recovery rates across the main target-domain methods, students, and teachers. The plot shows that the gap recovery rate is higher for the 4B student in every evaluated setting. This result is partly expected because the 4B student starts from stronger performance before distillation and therefore has a smaller gap to recover.
 
 However, the first column of each subplot gives the closest comparison between the two students in Figure \ref{fig: capacity-summary-figure}. In both cases, the teacher is the smallest available teacher above the student, and the teacher--student AIME gap is of similar magnitude. Under these conditions, the 4B student recovers around 87\% of the gap, while the 0.6B student reaches only 36\% in the best case. These results suggest that the capacity gap is not determined only by the teacher--student performance difference. The student's own capacity to represent and use the teacher signal is also central to the distillation outcome.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.9\linewidth]{figures/methods_bubble_gap_recovery.png}
-    \caption{Summary of the experiments in this chapter showing the gap recovery rates for each method, student, and teacher combination. The gap recovery rate is higher for the 4B student than for the 0.6B student in all evaluated settings. The plot also shows that using the system prompt was the most effective intervention for improving student performance.}
+    \caption{Capacity-alignment map for the main gap-recovery experiments. Bubble color, size, and label show AIME gap recovery for each student, teacher, and main target-domain distillation intervention. The map summarizes the main target-domain results; top-$K$ coverage, out-of-distribution retention, and length diagnostics are analyzed separately in Figures~\ref{fig: top-k_effect}, \ref{fig: gpqa_vs_aime}, and \ref{fig: rollout_length}, and in Appendix~\ref{sec: app_ifeval_forgettin}.}
     \label{fig: capacity-summary-figure}
 \end{figure}

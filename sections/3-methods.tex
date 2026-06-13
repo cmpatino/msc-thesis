@@ -288,6 +288,9 @@ TS-RKL is not the standard top-$k$ reverse KL in Equation~\ref{eq:topk_reverse_k
 \section{Metrics}
 \label{sec:metrics}
 
+\textbf{Teacher-Signal Usability.}
+We use teacher-signal usability to refer to the extent to which a student can convert information exposed by the teacher into improved behavior without pathological side effects. This separates signal exposure from signal usability. Teacher size, hidden context, and top-$K$ probability mass coverage all increase or change what information is exposed to the student, but they do not by themselves show whether the student can represent and learn from that information. We operationalize usability through target-domain gap recovery, rollout length and truncation, top-$K$ probability mass coverage, and out-of-distribution retention.
+
 \textbf{Top-$k$ Support Coverage.}
 A teacher-support top-$k$ reverse-KL objective can only provide token-level supervision on the tokens in the teacher's top-$k$ set. Student probability mass placed on tokens outside that set is therefore not supervised at the token level. We measure how much of the student's next-token distribution is spanned by the teacher's top-$k$ support. Let $\mathcal{H}_{\mathrm{eval}}$ be the set of prefixes used for evaluation, with each prefix written as $h_n=(x,y_{<n})$. Using the teacher top-$k$ set $S_{T,n}^{k}$ from Equation~\ref{eq:topk_sets}, we define the top-$k$ support coverage as
 \begin{equation}
