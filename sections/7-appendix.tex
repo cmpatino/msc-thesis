@@ -17,10 +17,14 @@ The results in Figure~\ref{fig: opd_vs_off-policy} show that OPD is stronger tha
 
 \section{Catastrophic Forgetting in IFEval} \label{sec: app_ifeval_forgettin}
 
+Figure~\ref{fig: ifeval_reasoning} shows that the math-focused distillation runs do not produce a significant decline in IFEval. Most configurations remain at or above the initial student performance, and the configurations that fall below it do so by a small margin. This suggests that targeting mathematical reasoning does not substantially degrade the instruction-following capabilities measured by IFEval.
+
+There is a slight dependence on teacher size. For several methods, the IFEval change becomes smaller as the teacher becomes larger, but the difference between teacher sizes stays within two IFEval points. The clearest negative values come from the system-prompt setup, which is also the method with the highest AIME gap recovery. This shows a weak negative relationship between AIME improvement and IFEval retention: the strongest math gains can come with a small instruction-following cost, but the magnitude of the tradeoff is limited.
+
 \begin{figure}
     \centering
     \includegraphics[width=0.9\linewidth]{figures/recovery_aime_vs_ifeval_delta.png}
-    \caption{Caption}
+    \caption{Change in IFEval performance relative to the initial student as a function of AIME gap recovery. The plots show that IFEval remains stable across the evaluated distillation settings, with only small declines below the initial student baseline. Larger teachers produce slightly steeper IFEval declines, but the differences remain within two IFEval points. The system-prompt setup reaches the highest AIME recovery while also showing the largest IFEval drop, indicating a weak negative correlation between target-domain math gains and instruction-following retention.}
     \label{fig: ifeval_reasoning}
 \end{figure}
 
@@ -28,11 +32,15 @@ The results in Figure~\ref{fig: opd_vs_off-policy} show that OPD is stronger tha
 
 \section{TAID Results}
 
+TAID constructs an adaptive intermediate distribution between the student and teacher instead of forcing the student to match the teacher directly. The target starts closer to the student's initial distribution and gradually shifts toward the teacher as training progresses. This makes the teacher signal easier for the student to follow and is designed to address the capacity gap, mode averaging, and mode collapse in distillation \citep{shingTAIDTemporallyAdaptive2025}.
+
+The original TAID method is not an on-policy method. In this work, we implement an on-policy version by applying the adaptive intermediate target on student-generated rollouts, so the student still receives feedback on the states it actually visits during training. This is a methodological contribution because it combines TAID's capacity-gap interpolation with the OPD setting studied in this thesis. We only ran this experiment for the 0.6B student with the 4B teacher, so we do not treat it as a complete evaluation. However, the result in Figure~\ref{fig: taid_results} is promising: on-policy TAID reaches performance comparable to the system-prompt setup, which is the best-performing method for this student--teacher pair. This suggests that on-policy TAID is a strong direction for future work on making larger-teacher feedback more usable for small students.
+
 \begin{figure}
     \centering
     \includegraphics[width=0.9\linewidth]{figures/taid.png}
-    \caption{Results for our on-policy implementation of TAID compared to OPD and with the system prompt setup from Section \ref{sec: exps_system_prompt}. The results show that TAID is a promising technique to address the capacity gap because its performance matches our best technique for the 0.6B student and 4B teacher combination.}
-    \label{fig:placeholder}
+    \caption{AIME25 performance for the 0.6B student trained with the 4B teacher. Our on-policy TAID implementation applies TAID's adaptive intermediate target to student-generated rollouts and substantially improves over top-1 OPD. Its final performance is comparable to the system-prompt setup from Section~\ref{sec: exps_system_prompt}, which is the strongest method we evaluated for this student--teacher combination.}
+    \label{fig: taid_results}
 \end{figure}
 
 \FloatBarrier
